@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const Navbar = ({setCounts}) => {
+const Navbar = ({ setCounts }) => {
     const initialState = {
         SmbCount: 0,
         StringCount: 0,
