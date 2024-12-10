@@ -33,7 +33,6 @@ const Navbar = ({ setCounts }) => {
                         type="number"
                         name="SmbCount"
                         id="SmbCount"
-                        value={form.SmbCount}
                         placeholder="Enter SMB Count"
                         className="w-[200px] ml-3 p-2 rounded-xl"
                         onChange={handleChange}
@@ -45,7 +44,6 @@ const Navbar = ({ setCounts }) => {
                         type="number"
                         name="StringCount"
                         id="StringCount"
-                        value={form.StringCount}
                         placeholder="Enter String Count"
                         className="w-[200px] ml-3 p-2 rounded-xl"
                         onChange={handleChange}
@@ -57,7 +55,6 @@ const Navbar = ({ setCounts }) => {
                         type="number"
                         name="PanelCount"
                         id="PanelCount"
-                        value={form.PanelCount}
                         placeholder="Enter Panel Count"
                         className="w-[200px] ml-3 p-2 rounded-xl"
                         onChange={handleChange}
