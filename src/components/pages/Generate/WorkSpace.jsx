@@ -24,14 +24,6 @@ const WorkSpace = ({ counts }) => {
     };
 
     const layout = generateLayout();
-    useEffect(() => {
-        // Simulate loading delay to show the spinner
-        const timer = setTimeout(() => {
-            setIsLoading(true); // Set loading to false after 2 seconds (adjust as needed)
-        }, 2000);
-
-        return () => clearTimeout(timer); // Cleanup the timer on component unmount
-    }, []);
 
     const handleZoom = (event) => {
         const zoomFactor = event.deltaY < 0 ? 1.1 : 0.9;
