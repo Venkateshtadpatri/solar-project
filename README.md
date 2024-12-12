@@ -29,13 +29,12 @@ This project consists of a frontend and backend application for managing and vis
 
    ```bash
    git clone <repository_url>
-   cd frontend
    ```
 
 2. Install dependencies:
 
    ```bash
-   npm install
+   npm install --legacy-peer-deps
    ```
 
 3. Start the development server:
@@ -76,6 +75,7 @@ REACT_APP_BACKEND_URL=http://127.0.0.1:8000
 - **Solar Plant APIs**:
   - `GET /app/solar-plants/`: Fetches a list of all plants.
   - `GET /app/get-details/<plant_id>/`: Fetches details for a specific plant.
+  - `POST /app/layout-register/`: Registers the Layout to the Database.
 - **Authentication** (Optional): Secure endpoints for future enhancements.
 - **Database Management**: Uses MongoDB to store plant data.
 
@@ -85,7 +85,7 @@ REACT_APP_BACKEND_URL=http://127.0.0.1:8000
 
    ```bash
    git clone <repository_url>
-   cd backend
+   cd Plant
    ```
 
 2. Create and activate a virtual environment:
@@ -111,7 +111,7 @@ REACT_APP_BACKEND_URL=http://127.0.0.1:8000
 
 ### Environment Variables
 
-Create a `.env` file in the `backend` directory and add the following:
+Create a `.env` file in the `Plant` directory and add the following:
 
 ```env
 MONGO_URI=mongodb+srv://admin:<password>@node.8s5hmks.mongodb.net/
