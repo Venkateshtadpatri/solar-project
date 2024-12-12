@@ -138,7 +138,7 @@ mongorestore --uri="<MONGO_URI>" ./data/myDatabase
 
 1. Start the backend server.
 2. Start the frontend development server.
-3. Access the application at `http://localhost:3000`.
+3. Access the application at `http://localhost:5173`.
 
 ---
 
