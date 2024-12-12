@@ -1,19 +1,16 @@
-
-import Navbar from "./components/Navbar";
-import WorkSpace from "./components/WorkSpace";
+import { Routes, Route } from 'react-router-dom';
+import Generate from "./components/pages/Generate/Generate";
+import View from "./components/pages/View/View";
 import "./App.css";
-import {useState} from "react";
-import {RemoveScrollBar} from 'react-remove-scroll-bar';
 
 function App() {
-    const [counts, setCounts] = useState(0);
-
     return (
-        <div>
-            <RemoveScrollBar />
-            <Navbar setCounts={setCounts} />
-            <WorkSpace counts={counts} />
-        </div>
+        <>
+            <Routes>
+                <Route path='/' element={<Generate />} />
+                <Route path='/view/' element={<View />} />  
+            </Routes>
+        </>
     );
 }
 
