@@ -1,4 +1,4 @@
-# Project: Solar Plant Management System
+# Project: Solar Layout Generator
 
 ## Overview
 
