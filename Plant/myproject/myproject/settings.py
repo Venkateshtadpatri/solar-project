@@ -127,7 +127,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
     "https://solar-layout-generator.vercel.app",  # Your React app's URL
-    "mongodb+srv://saigopalbonthu:EawZVxqRxoU2tLCZ@node.8s5hmks.mongodb.net/",
+    "http://localhost:5173",
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_METHODS = [

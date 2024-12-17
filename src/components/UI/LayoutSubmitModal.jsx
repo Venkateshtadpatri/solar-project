@@ -4,18 +4,11 @@ const LayoutSubmitModal = ({ showModal, plant, smbCount, stringCount, panelCount
     const handleRegister = async () => {
         try {
             await axios.post("http://127.0.0.1:8000/app/layout-register/", {
-                PlantID: plant, // Use PlantID instead of PlantId
+                PlantID: plant,
                 SmbCount: smbCount,
                 StringCount: stringCount,
                 PanelCount: panelCount,
             });
-            // const response = {
-            //     PlantId: plant,
-            //     SmbCount: smbCount,
-            //     StringCount: stringCount,
-            //     PanelCount: panelCount,
-            // }
-            // console.log(response);
             alert("Layout Registration successful!");
             handleCloseModal();
         } catch (error) {

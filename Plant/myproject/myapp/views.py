@@ -1,14 +1,20 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from pymongo import MongoClient
+from datetime import datetime
+from pymongo import MongoClient,UpdateOne
+import time
+import threading
 import logging
 import random
+import pytz
+
 # MongoDB connection setup
-client = MongoClient("mongodb+srv://saigopalbonthu:EawZVxqRxoU2tLCZ@node.8s5hmks.mongodb.net/")  # Replace with your MongoDB URI
+client = MongoClient("mongodb+srv://saigopalbonthu:2BCQe21Y3QDuEuFe@node.8s5hmks.mongodb.net/")  # Replace with your MongoDB URI
 db = client['solarR&Ddatabase']  # Database name
 collection = db['generated_ids']  # Collection name
-solar_plants_collection= db['solar_plants']
+solar_plants_collection= db['solar_plants'] # Collection name
+power_output_collection = db['power_output'] # Collection name
 
 logger = logging.getLogger(__name__)
 
@@ -130,61 +136,198 @@ def get_all_plants(request):
 
 # =============================================================================================================================================
 
-# @csrf_exempt
-# def get_power_output(request, plant_id):
-#     if request.method == 'GET':
+@csrf_exempt
+def get_power_output(request, plant_id):
+    if request.method == 'GET':
+        try:
+            # Fetch the plant data from MongoDB based on PlantID
+            plant_data = collection.find_one({'PlantID': plant_id})
+
+            if not plant_data:
+                return JsonResponse({'status': 'error', 'message': 'Plant ID not found'}, status=404)
+
+            # Retrieve SMB count and String count from the database
+            smb_count = plant_data.get('SmbCount')
+            string_count = plant_data.get('StringCount')
+
+            if smb_count is None or string_count is None:
+                return JsonResponse({'status': 'error', 'message': 'SmbCount or StringCount missing in the database'}, status=500)
+
+            # Initialize output
+            response_data = []
+
+            # Loop to generate power outputs
+            for smb in range(1, smb_count + 1):
+                for string in range(1, string_count + 1):
+                    string_id = f"{smb}.{string}"
+
+                    # Generate initial voltage and current for the string
+                    voltage = round(random.uniform(0, 1500), 2)  # Voltage in volts
+                    current = round(random.uniform(9, 10.5), 2)  # Current in amperes
+
+                    # Calculate power output for this string
+                    power_output = round(voltage * current / 1000, 2)  # Power in kW
+
+                    # Append result to response
+                    response_data.append({
+                        'plant_id': plant_id,
+                        'string_id': string_id,
+                        'power_output': power_output,
+                        'voltage': voltage,
+                        'current': current
+                    })
+
+                    # Prepare data for update
+                    power_output_data = {
+                        'plant_id': plant_id,
+                        'string_id': string_id,
+                        'voltage': voltage,
+                        'current': current,
+                        'power_output': power_output,
+                        'timestamp': datetime.now()  # Timestamp of when the data was generated
+                    }
+
+                    # Update the power output in the database, or create a new document if none exists
+                    power_output_collection.update_one(
+                        {'plant_id': plant_id, 'string_id': string_id},  # Query to find the document
+                        {'$set': power_output_data},  # Update operation to set the new values
+                        upsert=True  # Create a new document if none exists
+                    )
+
+            # Return the power output data
+            return JsonResponse({'status': 'success', 'data': response_data}, status=200)
+
+        except Exception as e:
+            logger.error(f"Error in get_power_output: {e}")
+            return JsonResponse({'status': 'error', 'message': 'An error occurred'}, status=500)
+
+
+
+
+# =============================================================================================================================================
+
+# def update_power_output(plant_id, smb_count, string_count):
+#     """ Function to simulate and update the power output every 10 seconds """
+#     while True:
 #         try:
-#             # Validate plant ID
-#             if not plant_id:
-#                 return JsonResponse({'status': 'error', 'message': 'Plant ID is required'}, status=400)
-
-#             # Retrieve SmbCount and StringCount from MongoDB
-#             record = collection.find_one({'PlantID': plant_id})
-#             if not record:
-#                 return JsonResponse({'status': 'error', 'message': 'Plant ID not found'}, status=404)
-
-#             smb_count = record.get('SmbCount')
-#             string_count = record.get('StringCount')
-
-#             if smb_count is None or string_count is None:
-#                 return JsonResponse({'status': 'error', 'message': 'SmbCount or StringCount missing in database'}, status=500)
-
-#             try:
-#                 smb_count = int(smb_count)
-#                 string_count = int(string_count)
-#             except ValueError:
-#                 return JsonResponse({'status': 'error', 'message': 'Fields SmbCount and StringCount must be integers'}, status=400)
-
-#             # Initialize output
-#             response_data = []
+#             update_operations = []
 
 #             # Generate power outputs for each string within each SMB
 #             for smb in range(1, smb_count + 1):
-#                 smb_id = f"SMB{smb:02}"  # Format SMB ID as SMB01, SMB02, etc.
-#                 smb_data = {'smb_id': smb_id, 'strings': []}
-
 #                 for string in range(1, string_count + 1):
 #                     string_id = f"{smb}.{string}"
 
 #                     # Randomly generate voltage and current for the string
-#                     voltage = random.uniform(0, 1500)  # Example: Voltage in volts
-#                     current = random.uniform(0, 10)    # Example: Current in amperes
+#                     voltage = round(random.uniform(0, 1500), 2)  # Voltage in volts
+#                     current = round(random.uniform(9, 10.5), 2)  # Current in amperes
 
 #                     # Calculate power output for this string
-#                     power_output = round(voltage * current, 2)  # Power in watts (rounded to 2 decimals)
-#                     smb_data['strings'].append({
-#                         'string_id': string_id,
-#                         'power_output': f"{power_output}W"
-#                     })
+#                     power_output = round(voltage * current / 1000, 2)  # Power in watts
 
-#                 response_data.append(smb_data)
+#                     # Prepare the power output data to be updated
+#                     power_output_data = {
+#                         'power_output': power_output,
+#                         'voltage': voltage,
+#                         'current': current,
+#                         'timestamp': datetime.now()  # Add timestamp of when the data was updated
+#                     }
 
-#             # Return the generated IDs as a JSON response
-#             return JsonResponse({'status': 'success', 'data': response_data}, status=200)
-#         except json.JSONDecodeError:
-#             return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
+#                     # Create the update operation (update the document if it exists)
+#                     update_operation = UpdateOne(
+#                         {'plant_id': plant_id, 'string_id': string_id},
+#                         {'$set': power_output_data},
+#                         upsert=True  # If the document doesn't exist, it will be inserted
+#                     )
+
+#                     update_operations.append(update_operation)
+
+#             # Perform the bulk update operation
+#             if update_operations:
+#                 power_output_collection.bulk_write(update_operations)
+
+#             # Log the update
+#             logger.info(f"Power output data updated for plant: {plant_id}")
+
+#             # Sleep for 10 seconds before updating again
+#             time.sleep(10)
 #         except Exception as e:
-#             logger.exception("An unexpected error occurred")
+#             logger.exception(f"Error occurred while updating power output for plant {plant_id}: {str(e)}")
+
+# @csrf_exempt
+# def manage_power_output(request, plant_id):
+#     if request.method == 'GET':
+#         try:
+#             # Fetch the power output data from MongoDB based on PlantID
+#             power_output_data = list(power_output_collection.find({'plant_id': plant_id}))
+
+#             if not power_output_data:
+#                 return JsonResponse({'status': 'error', 'message': 'No power output data found for this plant'}, status=404)
+
+#             # Return the retrieved data
+#             return JsonResponse({'status': 'success', 'data': power_output_data}, status=200)
+
+#         except Exception as e:
+#             logger.exception("An error occurred while fetching power output data")
 #             return JsonResponse({'status': 'error', 'message': 'An unexpected error occurred: ' + str(e)}, status=500)
+
+#     elif request.method == 'POST':
+#         try:
+#             # Fetch the plant data from MongoDB based on PlantID
+#             plant_data = collection.find_one({'PlantID': plant_id})
+
+#             if not plant_data:
+#                 return JsonResponse({'status': 'error', 'message': 'Plant ID not found'}, status=404)
+
+#             # Retrieve SMB count and String count from the database
+#             smb_count = plant_data.get('SmbCount')
+#             string_count = plant_data.get('StringCount')
+
+#             if smb_count is None or string_count is None:
+#                 return JsonResponse({'status': 'error', 'message': 'SmbCount or StringCount missing in the database'}, status=500)
+
+#             # Initialize a list to store insert operations if no data exists
+#             insert_operations = []
+
+#             # Check if there is any existing data for this plant
+#             existing_data = list(power_output_collection.find({'plant_id': plant_id}))
+#             if not existing_data:
+#                 # Insert data if no existing data found
+#                 for smb in range(1, smb_count + 1):
+#                     for string in range(1, string_count + 1):
+#                         string_id = f"{smb}.{string}"
+
+#                         # Randomly generate voltage and current for the string
+#                         voltage = round(random.uniform(0, 1500), 2)  # Voltage in volts
+#                         current = round(random.uniform(9, 10.5), 2)  # Current in amperes
+
+#                         # Calculate power output for this string
+#                         power_output = round(voltage * current / 1000, 2)  # Power in watts
+
+#                         # Prepare the power output data to be inserted
+#                         power_output_data = {
+#                             'plant_id': plant_id,
+#                             'string_id': string_id,
+#                             'power_output': power_output,
+#                             'voltage': voltage,
+#                             'current': current,
+#                             'timestamp': datetime.now()  # Add timestamp of when the data was created
+#                         }
+
+#                         # Insert the data into the collection
+#                         insert_operations.append(power_output_data)
+
+#                 # Insert new data if no data exists for the plant
+#                 if insert_operations:
+#                     power_output_collection.insert_many(insert_operations)
+
+#                 # Start the background update thread for this plant
+#                 threading.Thread(target=update_power_output, args=(plant_id, smb_count, string_count), daemon=True).start()
+
+#             return JsonResponse({'status': 'success', 'message': 'Power output data inserted and will be updated periodically'}, status=200)
+
+#         except Exception as e:
+#             logger.exception("An error occurred while inserting/updating power output data")
+#             return JsonResponse({'status': 'error', 'message': 'An unexpected error occurred: ' + str(e)}, status=500)
+
 #     else:
 #         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)

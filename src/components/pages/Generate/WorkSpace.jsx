@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
 import { useRef, useState, useEffect } from "react";
 import ControlPanel from "../../hooks/ControlPanel";
-import SMBSection from "../../UI/SMBSection";
+import { TransformWrapper, TransformComponent, MiniMap } from "react-zoom-pan-pinch";
+import SMBSection from "./SMBSection";
 import useDrag from "../../hooks/useDrag";
 
 const WorkSpace = ({ counts }) => {
@@ -9,7 +10,6 @@ const WorkSpace = ({ counts }) => {
     const [scaleFactor, setScaleFactor] = useState(1);
     const { position, cursorStyle, handleMouseDown, setPosition } = useDrag();
     const { SmbCount, StringCount, PanelCount } = counts;
-
     const generateLayout = () => {
         const layout = [];
         for (let i = 0; i < SmbCount; i++) {
@@ -46,16 +46,14 @@ const WorkSpace = ({ counts }) => {
     }, []);
 
     useEffect(() => {
-        setPosition({ x: -50, y: -420 }); // Keep position centered when zooming
+        setPosition({ x: 0, y: 0 }); // Keep position centered when zooming
     }, [scaleFactor, setPosition]);
 
     return (
-        <div id="workspace" className="min-h-screen custom-background text-white w-[100%] h-[100%] p-80 -z-40">
-            <ControlPanel
-                setScaleFactor={setScaleFactor}
-                setPosition={setPosition}
-                scaleFactor={scaleFactor}
-            />
+        <div id="workspace" className="min-h-screen  custom-background text-white w-[100%] flex items-center justify-center p-10 -z-10">
+            <TransformWrapper>
+                     <ControlPanel/>
+            <TransformComponent>
             <div
                 ref={workspaceRef}
                 onMouseDown={handleMouseDown}
@@ -67,6 +65,7 @@ const WorkSpace = ({ counts }) => {
                     width: "100%",
                     height: "100%",
                 }}
+                className="-ml-[300px]"
             >
                 {layout.map((strings, smbIndex) => (
                     <SMBSection
@@ -77,6 +76,23 @@ const WorkSpace = ({ counts }) => {
                     />
                 ))}
             </div>
+            </TransformComponent>
+            <MiniMap
+            position={position}  // Position to track the visible area
+            scale={scaleFactor}  // Scale factor for the minimap
+            scaleContent={true}  // Option to scale the content inside the minimap
+            height={200} // Height of the minimap
+            width={200} // Width of the minimap
+            backgroundColor="rgba(0, 0, 0, 0.5)" // Background color of the minimap
+            borderRadius="10px" // Border radius for aesthetics
+            style={{
+                position: 'absolute',  // Ensures the minimap is positioned over the workspace
+                top: 20,               // Place it near the top
+                right: 20,             // Place it near the right corner
+                zIndex: 10            // Ensure it appears above other content
+            }}
+            />
+            </TransformWrapper>
         </div>
     );
 };

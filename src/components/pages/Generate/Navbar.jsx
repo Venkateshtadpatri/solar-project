@@ -36,7 +36,7 @@ const Navbar = ({ setCounts }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get("http://127.0.0.1:8000/app/solar-plants/");
+                const response = await axios.get("http://127.0.0.1:9000/app/solar-plants/");
                 setPlants(response.data.plants);
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -54,7 +54,7 @@ const Navbar = ({ setCounts }) => {
         <header className="w-full h-[75px] bg-red-400 sticky top-0 z-50">
             <div className="ml-5 pt-4">
                 <form>
-                    <label htmlFor="Plant_ID" className="font-bold ml-5">Plant_ID</label>
+                    <label htmlFor="Plant_ID" className="font-bold">Plant_ID</label>
                     <select
                         name="Plant_ID"
                         value={PlantId}
@@ -63,18 +63,14 @@ const Navbar = ({ setCounts }) => {
                         className="w-[200px] font-semibold ml-3 p-2 rounded-xl"
                         onChange={handlePlantChange}
                     >
-                        <option value="" disabled>
-                            Select PlantID
-                        </option>
+                        <option value="" disabled>Select PlantID</option>
                         {Plants.map((plant) => (
                             <option key={plant.Plant_ID} value={plant.Plant_ID}>
                                 {plant.Plant_ID}
                             </option>
                         ))}
                     </select>
-                    <label htmlFor="SmbCount" className="font-bold ml-4">
-                        SMB Count:
-                    </label>
+                    <label htmlFor="SmbCount" className="font-bold ml-4">SMB Count:</label>
                     <input
                         type="number"
                         name="SmbCount"
@@ -82,11 +78,9 @@ const Navbar = ({ setCounts }) => {
                         placeholder="Enter SMB Count"
                         value={SmbCount}
                         onChange={(e) => setSmbCount(e.target.value)}
-                        className="w-[200px]font-semibold ml-3 p-2 rounded-xl"
+                        className="w-[200px] font-semibold ml-3 p-2 rounded-xl"
                     />
-                    <label htmlFor="StringCount" className="font-bold ml-5">
-                        String Count:
-                    </label>
+                    <label htmlFor="StringCount" className="font-bold ml-5">String Count:</label>
                     <input
                         type="number"
                         name="StringCount"
@@ -96,9 +90,7 @@ const Navbar = ({ setCounts }) => {
                         onChange={(e) => setStringCount(e.target.value)}
                         className="w-[200px] font-semibold ml-3 p-2 rounded-xl"
                     />
-                    <label htmlFor="PanelCount" className="font-bold ml-5">
-                        Panel Count:
-                    </label>
+                    <label htmlFor="PanelCount" className="font-bold ml-5">Panel Count:</label>
                     <input
                         type="number"
                         name="PanelCount"
@@ -110,14 +102,14 @@ const Navbar = ({ setCounts }) => {
                     />
                     <button
                         onClick={handleGenerate}
-                        className="ml-10 rounded-xl w-[100px] h-10 bg-violet-500 text-white font-bold hover:bg-violet-400 hover:scale-105 duration-200"
+                        className="ml-3 rounded-xl w-[100px] h-10 bg-violet-500 text-white font-bold hover:bg-violet-400 hover:scale-105 duration-200"
                     >
                         Generate
                     </button>
                     {isGenerated && (
                         <button
                             onClick={handleSubmit}
-                            className="ml-10 rounded-xl w-[100px] h-10 bg-blue-500 text-white font-bold hover:bg-blue-400 hover:scale-105 duration-200"
+                            className="ml-3 rounded-xl w-[100px] h-10 bg-blue-500 text-white font-bold hover:bg-blue-400 hover:scale-105 duration-200"
                         >
                             Submit
                         </button>

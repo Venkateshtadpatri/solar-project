@@ -8,7 +8,7 @@ function App() {
         <>
             <Routes>
                 <Route path='/' element={<Generate />} />
-                <Route path='/view/' element={<View />} />  
+                <Route path='/view' element={<View />} />  
             </Routes>
         </>
     );

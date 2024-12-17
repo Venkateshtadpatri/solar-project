@@ -1,51 +1,61 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 const useDrag = () => {
-    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [position, setPosition] = useState({ x: 0 ,y: 0 });
     const [isDragging, setIsDragging] = useState(false);
-    const lastPos = useRef({ x: 0, y: 0 });
-    const [cursorStyle, setCursorStyle] = useState("default");
+    const lastPos = useRef({  x: 0 ,y: 0 });
+    const [cursorStyle, setCursorStyle] = useState("grab");
 
-    const handleMouseDown = (e) => {
+    const handleMouseDown = useCallback((e) => {
         e.preventDefault();
         setIsDragging(true);
-        setCursorStyle("grabbing");  // Change cursor to 'grabbing' on mousedown
-        lastPos.current = { x: e.clientX, y: e.clientY };
-    };
+        setCursorStyle("grabbing");
 
-    const handleMouseMove = (e) => {
+        const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+        const clientY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
+
+        lastPos.current = { x: clientX, y: clientY };
+    }, []);
+
+    const handleMouseMove = useCallback((e) => {
         if (!isDragging) return;
 
-        const dx = e.clientX - lastPos.current.x;
-        const dy = e.clientY - lastPos.current.y;
+        const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+        const clientY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
+
+        const dx = clientX - lastPos.current.x;
+        const dy = clientY - lastPos.current.y;
 
         setPosition((prevPos) => ({
             x: prevPos.x + dx,
             y: prevPos.y + dy,
         }));
 
-        lastPos.current = { x: e.clientX, y: e.clientY };
-    };
+        lastPos.current = { x: clientX, y: clientY };
+    }, [isDragging]);
 
-    const handleMouseUp = () => {
+    const handleMouseUp = useCallback(() => {
         setIsDragging(false);
-        setCursorStyle("grab");  // Change cursor to 'grab' when mouseup occurs
-    };
+        setCursorStyle("grab");
+    }, []);
 
     useEffect(() => {
         document.addEventListener("mousemove", handleMouseMove);
         document.addEventListener("mouseup", handleMouseUp);
+        document.addEventListener("touchmove", handleMouseMove, { passive: false });
+        document.addEventListener("touchend", handleMouseUp);
 
         return () => {
             document.removeEventListener("mousemove", handleMouseMove);
             document.removeEventListener("mouseup", handleMouseUp);
+            document.removeEventListener("touchmove", handleMouseMove);
+            document.removeEventListener("touchend", handleMouseUp);
         };
-    }, [isDragging]);
+    }, [handleMouseMove, handleMouseUp]);
 
-    // Return both position and cursor style
     return {
         position,
-        cursorStyle, // Add cursorStyle to return object
+        cursorStyle,
         handleMouseDown,
         setPosition,
     };

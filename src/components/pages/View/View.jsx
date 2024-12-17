@@ -7,9 +7,13 @@ const View = () => {
   const [SelectedPlantId, setSelectedPlantId] = useState(""); // Manage SelectedPlantId here
   const [plantDetails, setPlantDetails] = useState([]); // Details of the selected plant
   const [Plants, setPlants] = useState([]);
+
+  // Extract SmbCount, StringCount, and PanelCount from plantDetails
   const SmbCount = plantDetails?.data?.SmbCount ? parseInt(plantDetails.data.SmbCount, 10) : 0;
   const StringCount = plantDetails?.data?.StringCount ? parseInt(plantDetails.data.StringCount, 10) : 0;
   const PanelCount = plantDetails?.data?.PanelCount ? parseInt(plantDetails.data.PanelCount, 10) : 0;
+
+  // Fetch list of all available solar plants
   useEffect(() => {
     const fetchPlants = async () => {
       try {
@@ -22,6 +26,7 @@ const View = () => {
     fetchPlants();
   }, []);
 
+  // Fetch details of the selected plant when SelectedPlantId changes
   useEffect(() => {
     const fetchPlantDetails = async () => {
       if (!SelectedPlantId) return; // Don't fetch if no PlantId is selected
@@ -35,7 +40,7 @@ const View = () => {
     };
     fetchPlantDetails();
   }, [SelectedPlantId]);
-  console.log(plantDetails)
+
   return (
     <>
       <ViewNavbar 
@@ -44,9 +49,10 @@ const View = () => {
         Plants={Plants}
       />
       <ViewWorkspace 
-      SmbCount={SmbCount}
-      StringCount={StringCount}
-      PanelCount={PanelCount}
+        SmbCount={SmbCount}
+        StringCount={StringCount}
+        PanelCount={PanelCount}
+        SelectedPlantId={SelectedPlantId} // Pass plant ID to ViewWorkspace
       />
     </>
   );

@@ -27,7 +27,7 @@
     .solar-grid-overlay {
         position: relative;
     }
-
+    
     .solar-grid-overlay::after {
         content: "";
         position: absolute;
@@ -36,13 +36,19 @@
         right: 0;
         bottom: 0;
         background:
-                linear-gradient(90deg, rgba(255, 255, 255, 0.6) 2px, transparent 1px), /* white grid lines */
-                linear-gradient(0deg, rgba(255, 255, 255, 0.6) 2px, transparent 1px); /* white grid lines */
+            linear-gradient(90deg, rgba(255, 255, 255, 0.6) 2px, transparent 1px), /* white grid lines horizontally */
+            linear-gradient(0deg, rgba(255, 255, 255, 0.6) 2px, transparent 1px); /* white grid lines vertically */
         background-size: 20px 20px; /* Grid spacing */
         pointer-events: none; /* Ensure it doesn't block interactions */
+        
     }
+    
     .solar-bg-color {
         background-color: #313C8B;
+        padding : 0px 30px 0px 30px;
+    }
+    .grid-template-columns {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
     }
 
 
