@@ -4,25 +4,53 @@
 
 @layer utilities {
     .custom-background {
+        @apply transition-colors duration-300 ease-in-out;
+    }
+
+    /* Dark Mode Background */
+    .dark .custom-background {
         background:
-                linear-gradient(-90deg, rgba(255,255,255, .05) 1px, transparent 1px),
-                linear-gradient(rgba(255,255,255, .05) 1px, transparent 1px),
-                linear-gradient(-90deg, rgba(255,255,255, .04) 1px, transparent 1px),
-                linear-gradient(rgba(255,255,255, .04) 1px, transparent 1px),
-                linear-gradient(transparent 3px, #0d1226 3px, #0d1226 78px, transparent 78px),
-                linear-gradient(-90deg, #aaa 1px, transparent 1px),
-                linear-gradient(-90deg, transparent 3px, #0d1226 3px, #0d1226 78px, transparent 78px),
-                linear-gradient(#aaa 1px, transparent 1px),
-                #0d1226;
+            linear-gradient(-90deg, rgba(255,255,255, .05) 1px, transparent 1px),
+            linear-gradient(rgba(255,255,255, .05) 1px, transparent 1px),
+            linear-gradient(-90deg, rgba(255,255,255, .04) 1px, transparent 1px),
+            linear-gradient(rgba(255,255,255, .04) 1px, transparent 1px),
+            linear-gradient(transparent 3px, #0d1226 3px, #0d1226 78px, transparent 78px),
+            linear-gradient(-90deg, #aaa 1px, transparent 1px),
+            linear-gradient(-90deg, transparent 3px, #0d1226 3px, #0d1226 78px, transparent 78px),
+            linear-gradient(#aaa 1px, transparent 1px),
+            #0d1226;
         background-size:
-                4px 4px,
-                4px 4px,
-                80px 80px,
-                80px 80px,
-                80px 80px,
-                80px 80px,
-                80px 80px,
-                80px 80px;
+            4px 4px,
+            4px 4px,
+            80px 80px,
+            80px 80px,
+            80px 80px,
+            80px 80px,
+            80px 80px,
+            80px 80px;
+    }
+
+    /* Light Mode Background */
+    .custom-background {
+        background:
+            linear-gradient(-90deg, rgba(0,0,0, .05) 1px, transparent 1px),
+            linear-gradient(rgba(0,0,0, .05) 1px, transparent 1px),
+            linear-gradient(-90deg, rgba(0,0,0, .04) 1px, transparent 1px),
+            linear-gradient(rgba(0,0,0, .04) 1px, transparent 1px),
+            linear-gradient(transparent 3px, #f9fafb 3px, #f9fafb 78px, transparent 78px),
+            linear-gradient(-90deg, #ddd 1px, transparent 1px),
+            linear-gradient(-90deg, transparent 3px, #f9fafb 3px, #f9fafb 78px, transparent 78px),
+            linear-gradient(#ddd 1px, transparent 1px),
+            #f9fafb;
+        background-size:
+            4px 4px,
+            4px 4px,
+            80px 80px,
+            80px 80px,
+            80px 80px,
+            80px 80px,
+            80px 80px,
+            80px 80px;
     }
     .solar-grid-overlay {
         position: relative;
@@ -36,8 +64,8 @@
         right: 0;
         bottom: 0;
         background:
-            linear-gradient(90deg, rgba(255, 255, 255, 0.6) 2px, transparent 1px), /* white grid lines horizontally */
-            linear-gradient(0deg, rgba(255, 255, 255, 0.6) 2px, transparent 1px); /* white grid lines vertically */
+            linear-gradient(to right, rgba(255, 255, 255, 0.6) 2px, transparent 2px) 50% center, /* Vertical line at the center */
+            linear-gradient(to bottom, rgba(255, 255, 255, 0.6) 2px, transparent 2px) center 50%; /* Horizontal line at the center */
         background-size: 20px 20px; /* Grid spacing */
         pointer-events: none; /* Ensure it doesn't block interactions */
         
@@ -51,5 +79,17 @@
         grid-template-columns: repeat(1, minmax(0, 1fr));
     }
 
+    #workspace {
+        overflow: auto; /* Allow workspace-specific scrolling if needed */
+        position: relative;
+        z-index: 0; /* Ensure it sits below modals */
+    }
+    #view-workspace {
+        overflow: auto; /* Allow workspace-specific scrolling if needed */
+        position: relative;
+        z-index: 0; /* Ensure it sits below modals */
+    }
+
 
 }
+

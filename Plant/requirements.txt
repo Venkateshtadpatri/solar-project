@@ -1,3 +1,5 @@
 django
 django-cors-headers
 pymongo
+requests
+pytz

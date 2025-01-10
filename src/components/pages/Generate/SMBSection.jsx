@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
 
 const SMBSection = ({ smbIndex, StringCount, PanelCount }) => {
-    
+
+    console.log("String count", StringCount)
     return (
         <div key={smbIndex} className="flex justify-center items-center mt-32">
             {/* SMB Image Section */}

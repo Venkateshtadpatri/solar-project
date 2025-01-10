@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Navbar from "./Navbar";
+import './Generate.css'
 import WorkSpace from "./WorkSpace";
 const initialState = {
     SmbCount: 0,

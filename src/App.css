@@ -1,5 +1,47 @@
-* {
+/* Global Reset */
+body, html {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  height: 100%;
 }
+
+/* Ensure root takes full screen */
+#root {
+  height: 100%;
+  overflow: hidden; /* Consider removing this if dragging needs scrolling */
+}
+
+/* Backdrop Styles (Scoped to modal-specific context) */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000; /* Ensure modal appears above other content */
+}
+
+/* Modal Styles */
+.modal {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background: white;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 1001; /* Slightly above backdrop */
+}
+
+.modal button {
+  color: #444;
+  border: 1px solid #444;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+.modal p {
+  color: #444;
+  font-weight: bold;
+}
+

@@ -36,7 +36,7 @@ const Navbar = ({ setCounts }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get("http://127.0.0.1:9000/app/solar-plants/");
+                const response = await axios.get("http://127.0.0.1:8000/api/solar-plants/");
                 setPlants(response.data.plants);
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -51,8 +51,8 @@ const Navbar = ({ setCounts }) => {
     };
 
     return (
-        <header className="w-full h-[75px] bg-red-400 sticky top-0 z-50">
-            <div className="ml-5 pt-4">
+        <header className="w-full h-[100px] bg-red-400 sticky top-0 z-50">
+            <div className="ml-5 pt-4 pb-4">
                 <form>
                     <label htmlFor="Plant_ID" className="font-bold">Plant_ID</label>
                     <select
@@ -63,7 +63,7 @@ const Navbar = ({ setCounts }) => {
                         className="w-[200px] font-semibold ml-3 p-2 rounded-xl"
                         onChange={handlePlantChange}
                     >
-                        <option value="" disabled>Select PlantID</option>
+                        <option value="" disabled className="text-gray-40">Select PlantID</option>
                         {Plants.map((plant) => (
                             <option key={plant.Plant_ID} value={plant.Plant_ID}>
                                 {plant.Plant_ID}

@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="D:\Plant\env"
+VIRTUAL_ENV="C:\Users\Sai Gopal\WebstormProjects\solar-layout\solar-layout-generator\Plant\env"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import ControlPanel from "../../hooks/ControlPanel";
-import { TransformWrapper, TransformComponent, MiniMap } from "react-zoom-pan-pinch";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import SMBSection from "./SMBSection";
 import useDrag from "../../hooks/useDrag";
 
@@ -10,6 +11,9 @@ const WorkSpace = ({ counts }) => {
     const [scaleFactor, setScaleFactor] = useState(1);
     const { position, cursorStyle, handleMouseDown, setPosition } = useDrag();
     const { SmbCount, StringCount, PanelCount } = counts;
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+    // Generate Layout
     const generateLayout = () => {
         const layout = [];
         for (let i = 0; i < SmbCount; i++) {
@@ -25,19 +29,28 @@ const WorkSpace = ({ counts }) => {
 
     const layout = generateLayout();
 
-    const handleZoom = (event) => {
-        const zoomFactor = event.deltaY < 0 ? 1.1 : 0.9;
-        setScaleFactor((prevScale) => {
-            const newScale = prevScale * zoomFactor;
-            return Math.max(0.1, Math.min(newScale, 5)); // Set limits for scaling
-        });
-    };
-
+    // Zoom Handling
     useEffect(() => {
+        const handleZoom = (event) => {
+            event.preventDefault();
+
+            if (!workspaceRef.current) return;
+
+            const rect = workspaceRef.current.getBoundingClientRect();
+            const offsetX = event.clientX - rect.left;
+            const offsetY = event.clientY - rect.top;
+
+            setMousePosition({ x: offsetX, y: offsetY });
+
+            const zoomFactor = event.deltaY < 0 ? 1.1 : 0.9;
+            setScaleFactor((prevScale) => Math.max(0.1, Math.min(prevScale * zoomFactor, 5)));
+        };
+
         const workspaceElement = workspaceRef.current;
         if (workspaceElement) {
-            workspaceElement.addEventListener("wheel", handleZoom, { passive: true });
+            workspaceElement.addEventListener("wheel", handleZoom, { passive: false });
         }
+
         return () => {
             if (workspaceElement) {
                 workspaceElement.removeEventListener("wheel", handleZoom);
@@ -45,53 +58,47 @@ const WorkSpace = ({ counts }) => {
         };
     }, []);
 
+    // Update Position Based on Zoom
     useEffect(() => {
-        setPosition({ x: 0, y: 0 }); // Keep position centered when zooming
-    }, [scaleFactor, setPosition]);
+        // Apply scaling to the position on zoom to maintain the correct position visually
+        setPosition({
+            x: position.x * scaleFactor,
+            y: position.y * scaleFactor,
+        });
+    }, [scaleFactor, position, setPosition]);
 
     return (
-        <div id="workspace" className="min-h-screen  custom-background text-white w-[100%] flex items-center justify-center p-10 -z-10">
+        <div id="workspace" className="min-h-screen custom-background text-white w-full h-full p-1 -z-40">
             <TransformWrapper>
-                     <ControlPanel/>
-            <TransformComponent>
-            <div
-                ref={workspaceRef}
-                onMouseDown={handleMouseDown}
-                style={{
-                    transform: `scale(${scaleFactor}) translate(${position.x}px, ${position.y}px)`,
-                    transformOrigin: "center",
-                    cursor: cursorStyle,
-                    position: "relative",
-                    width: "100%",
-                    height: "100%",
-                }}
-                className="-ml-[300px]"
-            >
-                {layout.map((strings, smbIndex) => (
-                    <SMBSection
-                        key={smbIndex}
-                        smbIndex={smbIndex}
-                        StringCount={StringCount}
-                        PanelCount={PanelCount}
-                    />
-                ))}
-            </div>
-            </TransformComponent>
-            <MiniMap
-            position={position}  // Position to track the visible area
-            scale={scaleFactor}  // Scale factor for the minimap
-            scaleContent={true}  // Option to scale the content inside the minimap
-            height={200} // Height of the minimap
-            width={200} // Width of the minimap
-            backgroundColor="rgba(0, 0, 0, 0.5)" // Background color of the minimap
-            borderRadius="10px" // Border radius for aesthetics
-            style={{
-                position: 'absolute',  // Ensures the minimap is positioned over the workspace
-                top: 20,               // Place it near the top
-                right: 20,             // Place it near the right corner
-                zIndex: 10            // Ensure it appears above other content
-            }}
-            />
+                <ControlPanel />
+                <TransformComponent>
+                    <div
+                        ref={workspaceRef}
+                        onMouseDown={handleMouseDown}
+                        onMouseMove={(e) => {
+                            const rect = workspaceRef.current?.getBoundingClientRect();
+                            setMousePosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                        }}
+                        style={{
+                            transform: `scale(${scaleFactor}) translate(${position.x}px, ${position.y}px)`,
+                            transformOrigin: `center`,
+                            cursor: cursorStyle,
+                            position: "relative",
+                            width: "100%",
+                            height: "100%",
+                        }}
+                        className="-ml-[300px]"
+                    >
+                        {layout.map((strings, smbIndex) => (
+                            <SMBSection
+                                key={smbIndex}
+                                smbIndex={smbIndex}
+                                StringCount={StringCount}
+                                PanelCount={PanelCount}
+                            />
+                        ))}
+                    </div>
+                </TransformComponent>
             </TransformWrapper>
         </div>
     );
