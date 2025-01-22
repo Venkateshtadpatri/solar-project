@@ -112,7 +112,7 @@ const ViewWorkspace = ({ SmbCount, StringCount, PanelCount, SelectedPlantId }) =
                             width: "100%",
                             height: "100%",
                         }}
-                        className="-ml-[300px]"
+                        className="-ml-[200px]"
                     >
                         {layout.map((_, smbIndex) => (
                             <ViewSMBSection

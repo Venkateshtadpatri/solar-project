@@ -38,6 +38,10 @@ smb_collection = db['smbs_data']
 string_collection= db['strings_data']
 graph_collection = db['graph_collection']
 alerts_collection = db['alerts']
+analytics_collection = db['historical_data']
+alert_history_collection = db['alert_history']
+maintenance_tasks_collection = db["maintenance_tasks"]  
+maintenance_history_collection=db['maintenance_history']
 collection = db['generated_ids']  # Collection name
 solar_plants_collection= db['solar_plants'] # Collection name
 power_output_collection = db['power_output'] # Collection name
@@ -204,7 +208,7 @@ def admin_registration(request):
                 return JsonResponse({'message': 'Admin with that Plant ID already exists'}, status=400)
 
             # Create user_id using Plant_ID and "A01"
-            user_id = f"{Plant_ID}_01"
+            user_id = f"{Plant_ID}-01"
             logger.info(f"Generated user_id: {user_id} for Plant ID: {Plant_ID}")
 
             # Hash the password
@@ -694,6 +698,26 @@ def solar_plant_data(request):
     except Exception as e:
         return JsonResponse({'error': f"An error occurred: {str(e)}"}, status=500)
 
+@csrf_exempt
+def delete_plant(request):
+    if request.method == 'DELETE':
+        try:
+            data = json.loads(request.body)
+            plant_id = data.get('plant_id')
+            # Check if the plant exists in the database
+            result = solar_plants_collection.delete_one({'Plant_ID': plant_id})
+
+            if result.deleted_count == 0:
+                return JsonResponse({'status': 'error', 'message': 'Plant not found'}, status=404)
+
+            return JsonResponse({'status': 'success', 'message': 'User deleted successfully'})
+
+        except Exception as e:
+            logger.error(f'Error in delete_plant API: {str(e)}', exc_info=True)
+            return JsonResponse({'status': 'error', 'message': 'An unexpected error occurred'}, status=500)
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 @csrf_exempt
 def send_otp(request):
     OTP_EXPIRATION_TIME_MINUTES = 1  # Set OTP expiration time to 5 minutes
@@ -1362,8 +1386,9 @@ def power_output(request, plant_id):
 
                     smb_data['strings'].append({
                         'string_id': string_id,
-                        'voltage': voltage,
-                        'power_output': power_output
+                        'voltage': round(voltage, 2),
+                        'current': round(current, 2),  
+                        'power_output': power_output,
                     })
 
                 updated_data.append(smb_data)
@@ -1482,13 +1507,25 @@ def get_smb_details_by_id(request, plant_id, smb_id):
             if not smb_data:
                 return JsonResponse({'status': 'error', 'message': f'SMB with ID {smb_id} not found in Plant {plant_id}.'}, status=404)
 
-            return JsonResponse({'status': 'success', 'data': smb_data}, status=200)
+            # Format the response as required
+            response_data = {
+                "status": "success",
+                "data": [
+                    {
+                        "smb_id": smb_data.get("smb_id"),
+                        "strings": smb_data.get("strings", [])
+                    }
+                ]
+            }
+
+            return JsonResponse(response_data, status=200)
 
         except Exception as e:
             logger.exception("An unexpected error occurred.")
             return JsonResponse({'status': 'error', 'message': f'An unexpected error occurred: {str(e)}'}, status=500)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
 
 
 @csrf_exempt
@@ -1520,10 +1557,24 @@ def get_all_smbs(request, plant_id):
                     string.get('power_output', 0) for string in strings
                 )
 
+                total_current_output = sum(
+                    string.get('current', 0) for string in strings
+                )
+
+                total_voltage_output = sum(
+                    string.get('voltage', 0) for string in strings
+                )
+
+                # Generate random temperature value (e.g., between 20 and 40 degrees Celsius)
+                random_temperature = round(random.uniform(20, 40), 2)
+
                 smb_summary = {
                     'smb_id': smb_id,
                     'String_count': string_count,
                     'Power_output': round(total_power_output, 2),
+                    'Current_output': round(total_current_output, 2),
+                    'Voltage_output': round(total_voltage_output, 2),
+                    'Temperature': random_temperature,  # Add the temperature value
                     'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M:%S')  # User-friendly timestamp
                 }
                 smb_list.append(smb_summary)
@@ -1668,6 +1719,7 @@ def update_admin(request, plant_id):
 
 @csrf_exempt
 def delete_admin(request):
+
     if request.method == 'DELETE':
         try:
             # Parse JSON body
@@ -1688,3 +1740,552 @@ def delete_admin(request):
 
     else:
         return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+    
+def get_next_alert_id():
+    """Generate the next alert ID based on the highest existing alert ID in the database."""
+    collection = alerts_collection
+    last_alert = collection.find_one(sort=[("alertID", -1)])  # Find the last inserted document sorted by alertID
+    if last_alert and "alertID" in last_alert:
+        last_id = int(last_alert["alertID"][3:])  # Extract the numeric part of the last alertID
+        next_id = last_id + 1
+    else:
+        next_id = 1  # Start from 1 if no alerts exist yet
+    return f"ALT{str(next_id).zfill(3)}"
+
+@csrf_exempt
+def active_alerts(request, plant_id):
+    try:
+        # Ensure request method is GET
+        if request.method != 'GET':
+            return JsonResponse({"error": "Only GET method is allowed"}, status=400)
+
+        if not plant_id:
+            return JsonResponse({"error": "Plant ID is required"}, status=400)
+
+        # Fetch SMB count and String count from solar_plants_collection
+        plant_data = solar_plants_collection.find_one({"plant_id": plant_id})
+
+        if not plant_data:
+            # If plant data doesn't exist, create it with default values
+            smb_count = 10  # Default SMB count
+            string_count = 5  # Default string count
+            plant_data = {
+                "plant_id": plant_id,
+                "SMBCount": smb_count,
+                "StringCount": string_count,
+            }
+            # Insert the new plant data into the collection
+            solar_plants_collection.insert_one(plant_data)
+        else:
+            smb_count = plant_data.get("SMBCount", 0)
+            string_count = plant_data.get("StringCount", 0)
+
+        # Validate SMB and String counts
+        if smb_count <= 0 or string_count <= 0:
+            return JsonResponse({"error": "Invalid SMB or String count for the plant"}, status=400)
+
+        # Check if alerts data already exists for the given plant_id
+        existing_alerts = alerts_collection.find_one({"plant_id": plant_id})
+        if existing_alerts:
+            # If alerts data exists, return the existing alerts
+            return JsonResponse({
+                "plant_id": plant_id,
+                "alerts": existing_alerts["GeneratedData"],
+            }, status=200)
+
+        alerts = []
+        alert_names = ["Dust", "Bird waste", "Crack", "Voltage Fluctuation"]
+
+        # Define action required mapping
+        actions_required_mapping = {
+            "Dust": "Cleaning",
+            "Bird waste": "Cleaning",
+            "Crack": "Repair",
+            "Voltage Fluctuation": "Contact Operator"
+        }
+
+        severity_levels = ["Online", "Warning", "Critical"]
+
+        # Create string mapping for each SMB
+        smb_ids = [f"{str(i).zfill(1)}" for i in range(1, smb_count + 1)]
+        string_mapping = {
+            smb_id: [f"{smb_id}.{j}" for j in range(1, string_count + 1)]
+            for smb_id in smb_ids
+        }
+
+        # Generate exactly 25 alerts
+        for _ in range(25):
+            smb_id = random.choice(smb_ids)
+            alert_name = random.choice(alert_names)
+            alert_id = get_next_alert_id()  # Generate unique alert ID
+
+            alert_data = {
+                "alertID": alert_id,  # Unique alert ID
+                "SMB_ID": smb_id,  # SMB ID
+                "STRING_ID": random.choice(string_mapping[smb_id]),  # Random string ID
+                "alert_name": alert_name,  # Alert type
+                "severity_level": random.choice(severity_levels),  # Severity level
+                "time_detected": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),  # Time detected
+                "action_required": actions_required_mapping[alert_name],  # Action required
+                "status": random.choice(["Complete", "Incomplete"]),  # Alert status
+            }
+            alerts.append(alert_data)
+
+        # Prepare the data to insert into the database
+        plant_alert_data = {
+            "plant_id": plant_id,
+            "GeneratedData": alerts,
+            "Timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        }
+
+        # Insert the new alert data into the collection
+        alerts_collection.insert_one(plant_alert_data)
+
+        # Return the generated alerts with plant_id
+        return JsonResponse({
+            "plant_id": plant_id,
+            "alerts": alerts
+        }, status=200)
+
+    except Exception as e:
+        # Log and return the error
+        print("Error occurred:", str(e))
+        return JsonResponse({"error": "An unexpected error occurred", "details": str(e)}, status=500)
+
+
+@csrf_exempt
+def alert_history(request, plant_id):
+    try:
+        if request.method != 'GET':
+            return JsonResponse({"error": "Only GET method is allowed"}, status=400)
+
+        # Fetch existing alert history data for the given plant_id
+        history_collection = alert_history_collection
+        existing_history_data = history_collection.find_one({"plant_id": plant_id})
+
+        if existing_history_data:
+            # Convert ObjectId to string for serialization
+            existing_history_data['_id'] = str(existing_history_data['_id'])
+            # Return the existing alert history data
+            return JsonResponse(existing_history_data, status=200)
+
+        # Fetch alerts from the original collection for the given plant_id
+        collection = alerts_collection
+        existing_alert_data = collection.find_one({"plant_id": plant_id})
+
+        if not existing_alert_data:
+            return JsonResponse({"message": "No alerts found for this plant_id"}, status=200)
+
+        # If alert data exists, use it; otherwise, return a message indicating no alerts
+        alerts = existing_alert_data.get("GeneratedData", [])
+
+        if not alerts:
+            return JsonResponse({"message": "No generated alerts found for this plant_id"}, status=200)
+
+        # Add the 'status' field to each alert
+        statuses = ["incomplete", "success"]
+        history_alerts = []
+
+        for index, alert in enumerate(alerts):
+            alert_copy = alert.copy()  # Create a copy of the alert to modify
+            
+            # Generate a unique alertID (if necessary) by appending index to it
+            alert_copy['alertID'] = f"ALT{index+1:03d}"
+
+            # Do not copy _id field from the original alert as MongoDB will generate a new _id
+            if '_id' in alert_copy:
+                del alert_copy['_id']  # Remove the _id field if it exists
+            
+            alert_copy['status'] = random.choice(statuses)  # Assign a random status
+            history_alerts.append(alert_copy)  # Append to the list of history alerts
+
+        # Insert all alerts as one document in the history collection
+        alert_history_data = {
+            "plant_id": plant_id,
+            "GeneratedData": history_alerts,
+            "Timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        }
+        result = history_collection.insert_one(alert_history_data)
+
+        # Convert _id to string before sending in response
+        alert_history_data['_id'] = str(result.inserted_id)
+
+        # Return the alert history as a JSON response
+        return JsonResponse(alert_history_data, status=200)
+
+    except errors.ServerSelectionTimeoutError as db_err:
+        return JsonResponse({"error": "Database connection failed", "details": str(db_err)}, status=500)
+    except errors.PyMongoError as db_err:
+        return JsonResponse({"error": "Database operation failed", "details": str(db_err)}, status=500)
+    except Exception as e:
+        print("Error occurred:", str(e))
+        return JsonResponse({"error": "An unexpected error occurred", "details": str(e)}, status=500)
+
+@csrf_exempt
+def energy_data(request, frequency, smb_id):
+    if request.method == 'GET':
+        try:
+            # Validate frequency
+            if frequency not in ["daily", "weekly", "monthly", "yearly"]:
+                return JsonResponse({"status": "error", "message": "Invalid frequency parameter"}, status=400)
+
+            # Validate smb_id
+            if not smb_id:
+                return JsonResponse({"status": "error", "message": "Missing smb_id parameter"}, status=400)
+
+            # Query the data using $elemMatch to find documents that contain the specific smb_id in the data array
+            query = {
+                "frequency": frequency,
+                "data.smb_id": smb_id  # This ensures we find only the record with the exact smb_id
+            }
+
+            logger.info(f"Querying MongoDB with: {query}")
+
+            # Query the data from the collection
+            data = analytics_collection.find(query)
+            records = list(data)
+            logger.info(f"Number of records found: {len(records)}")
+
+            # Prepare and serialize the response
+            result = []
+            for record in records:
+                # Flatten the data by removing smb_id redundancy and group the data by `key` (year, month, week, etc.)
+                for entry in record.get("data", []):
+                    # Only include data related to the requested smb_id
+                    if entry.get("smb_id") == smb_id:
+                        # Prepare the response without repeating smb_id
+                        result.append({
+                            "key": entry.get("key"),
+                            "data": entry.get("data")
+                        })
+
+            return JsonResponse({"status": "success", "data": result}, status=200)
+
+        except Exception as e:
+            logger.exception("An error occurred while fetching energy data.")
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+
+@csrf_exempt
+def upcoming_maintenance(request, plant_id):  # Directly use plant_id passed to the view
+    try:
+        if request.method != 'GET':
+            logger.warning(f"Invalid method: {request.method} for plant_id: {plant_id}")
+            return JsonResponse({"error": "Only GET method is allowed"}, status=400)
+
+        # Check if the plant_id exists in the solar_plant_collection
+        plant = solar_plants_collection.find_one({"Plant_ID": plant_id})
+        if not plant:
+            logger.warning(f"Invalid plant_id: {plant_id} not found in solar_plant_collection.")
+            return JsonResponse({"error": "Invalid plant ID"}, status=400)
+
+        logger.info(f"Found plant with ID: {plant_id}. Preparing maintenance tasks.")
+
+        # Check if a maintenance document exists for the plant
+        maintenance_doc = maintenance_tasks_collection.find_one({"Plant_ID": plant_id})
+
+        # If maintenance document exists, check the number of existing tasks
+        if maintenance_doc:
+            existing_tasks = maintenance_doc.get("tasks", [])
+            task_count = len(existing_tasks)
+
+            if task_count >= 30:
+                logger.info(f"Plant {plant_id} already has 30 tasks. No new tasks will be added.")
+                return JsonResponse(
+                    {
+                        "Plant_ID": plant_id,
+                        "message": "No new tasks were added. Maximum of 30 tasks already exists.",
+                        "tasks": existing_tasks,
+                    },
+                    status=200,
+                    safe=False,
+                )
+        else:
+            existing_tasks = []
+            task_count = 0
+
+        # Generate new tasks to fill up to 30 tasks
+        task_names = ["Panel Cleaning", "Inverter Inspection", "Cable Check", "SMB Maintenance", "Voltage Calibration"]
+        status = "Scheduled"  # Fixed status for all tasks
+
+        new_tasks = []  # Tasks to be added to the existing tasks list
+        for i in range(task_count + 1, 31):  # Fill up to 30 tasks
+            task_id = f"TASK{str(i).zfill(4)}"  # TASK0001, TASK0002, ...
+            task_name = random.choice(task_names)
+            schedule_date = (datetime.now() + timedelta(days=random.randint(5, 15))).strftime("%d/%m/%Y")
+            task_description = f"Description for {task_name} scheduled on {schedule_date}"
+
+            task = {
+                "task_ID": task_id,
+                "task_name": task_name,
+                "schedule_date": schedule_date,
+                "status": status,
+                "task_description": task_description,
+            }
+            new_tasks.append(task)
+
+        # Add the new tasks to the existing tasks
+        all_tasks = existing_tasks + new_tasks
+
+        if maintenance_doc:
+            # Update the existing document with new tasks
+            maintenance_tasks_collection.update_one(
+                {"Plant_ID": plant_id}, {"$set": {"tasks": all_tasks}}
+            )
+            logger.info(f"Updated maintenance tasks for plant {plant_id}.")
+        else:
+            # Create a new document for the plant with the tasks
+            maintenance_tasks_collection.insert_one(
+                {"Plant_ID": plant_id, "tasks": all_tasks}
+            )
+            logger.info(f"Created new maintenance document for plant {plant_id}.")
+
+        # Return the tasks under the plant_id
+        response = {
+            "Plant_ID": plant_id,
+            "tasks": all_tasks,  # Include all tasks under the "tasks" key
+        }
+
+        logger.info(f"Successfully handled {len(new_tasks)} new tasks for plant {plant_id}.")
+        return JsonResponse(response, status=200, safe=False)
+
+    except Exception as e:
+        logger.error(f"An unexpected error occurred for plant {plant_id}: {str(e)}")
+        return JsonResponse({"error": "An unexpected error occurred", "details": str(e)}, status=500)
+    
+@csrf_exempt
+def update_maintenace_task(request, plant_id, task_id):
+    try:
+        if request.method != 'PUT':
+            logger.warning(f"Invalid method: {request.method} for plant_id: {plant_id}, task_id: {task_id}")
+            return JsonResponse({"error": "Only PUT method is allowed for this endpoint."}, status=400)
+
+        # Parse the request body
+        body = json.loads(request.body.decode('utf-8'))
+        task_name = body.get("task_name")
+        task_description = body.get("task_description")
+
+        if not task_name and not task_description:
+            logger.warning(f"No valid fields provided for update for task {task_id} in plant {plant_id}.")
+            return JsonResponse({"error": "At least one field (task_name or task_description) must be provided."}, status=400)
+
+        # Check if the plant_id exists in the maintenance_tasks_collection
+        maintenance_doc = maintenance_tasks_collection.find_one({"Plant_ID": plant_id})
+        if not maintenance_doc:
+            logger.warning(f"Plant_ID {plant_id} not found in maintenance_tasks_collection.")
+            return JsonResponse({"error": "Invalid plant ID"}, status=400)
+
+        # Locate the specific task within the plant's maintenance document
+        task_exists = any(task["task_ID"] == task_id for task in maintenance_doc.get("tasks", []))
+        if not task_exists:
+            logger.warning(f"Task {task_id} not found for plant {plant_id}.")
+            return JsonResponse({"error": f"Task {task_id} not found for plant {plant_id}."}, status=404)
+
+        # Update the task fields
+        update_fields = {}
+        if task_name:
+            update_fields["tasks.$.task_name"] = task_name
+        if task_description:
+            update_fields["tasks.$.task_description"] = task_description
+
+        maintenance_tasks_collection.update_one(
+            {"Plant_ID": plant_id, "tasks.task_ID": task_id},
+            {"$set": update_fields}
+        )
+        logger.info(f"Updated task {task_id} for plant {plant_id} with fields: {update_fields}.")
+        return JsonResponse({'status': 'success',"message": f"Task {task_id} updated successfully."}, status=200)
+
+    except Exception as e:
+        logger.error(f"An unexpected error occurred for plant {plant_id}, task {task_id}: {str(e)}")
+        return JsonResponse({"error": "An unexpected error occurred", "details": str(e)}, status=500)
+    
+@csrf_exempt
+def maintenance_task_complete(request, plant_id, task_id):
+    try:
+        if request.method != 'POST':
+            logger.warning(f"Invalid method: {request.method} for plant_id: {plant_id}, task_id: {task_id}")
+            return JsonResponse({"error": "Only POST method is allowed for this endpoint."}, status=400)
+
+        # Check if the plant_id exists in the maintenance_tasks_collection
+        maintenance_doc = maintenance_tasks_collection.find_one({"Plant_ID": plant_id})
+        if not maintenance_doc:
+            logger.warning(f"Plant_ID {plant_id} not found in maintenance_tasks_collection.")
+            return JsonResponse({"error": "Invalid plant ID"}, status=400)
+
+        # Locate the specific task within the plant's maintenance document
+        task_index = next((index for (index, task) in enumerate(maintenance_doc.get("tasks", [])) if task["task_ID"] == task_id), None)
+        if task_index is None:
+            logger.warning(f"Task {task_id} not found for plant {plant_id}.")
+            return JsonResponse({"error": f"Task {task_id} not found for plant {plant_id}."}, status=404)
+
+        # Retrieve the task and remove it from the tasks list
+        task_to_complete = maintenance_doc["tasks"].pop(task_index)
+
+        # Add the "completed_date" field and update the status of the task
+        task_to_complete["completed_date"] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        task_to_complete["status"] = "completed"  # Update the status to "completed"
+
+        # Check if a history document already exists for the plant
+        history_doc = maintenance_history_collection.find_one({"Plant_ID": plant_id})
+        if history_doc:
+            # Append the task to the existing document
+            maintenance_history_collection.update_one(
+                {"Plant_ID": plant_id},
+                {"$push": {"tasks": task_to_complete}}
+            )
+            logger.info(f"Task {task_id} for plant {plant_id} added to existing maintenance_history_collection document.")
+        else:
+            # Create a new document for the plant in the history collection
+            new_history_doc = {
+                "Plant_ID": plant_id,
+                "tasks": [task_to_complete]
+            }
+            maintenance_history_collection.insert_one(new_history_doc)
+            logger.info(f"Task {task_id} for plant {plant_id} added to a new maintenance_history_collection document.")
+
+        # Update the maintenance_tasks_collection
+        maintenance_tasks_collection.update_one(
+            {"Plant_ID": plant_id},
+            {"$set": {"tasks": maintenance_doc["tasks"]}}
+        )
+        logger.info(f"Task {task_id} removed from maintenance_tasks_collection for plant {plant_id}.")
+
+        return JsonResponse({'status': 'success',"message": f"Task {task_id} marked as completed and moved to history."}, status=200)
+
+    except Exception as e:
+        logger.error(f"An unexpected error occurred for plant {plant_id}, task {task_id}: {str(e)}")
+        return JsonResponse({"error": "An unexpected error occurred", "details": str(e)}, status=500)
+    
+
+@csrf_exempt
+def maintenance_history(request, plant_id):
+    try:
+        if request.method == 'GET':
+            # Fetch the maintenance history for the specific plant_id if provided
+            if plant_id:
+                history_doc = maintenance_history_collection.find_one({"Plant_ID": plant_id}, {"_id": 0})
+                if history_doc:
+                    logger.info(f"Retrieved maintenance history for Plant_ID {plant_id}.")
+                    return JsonResponse(history_doc, safe=False, status=200)
+                else:
+                    logger.warning(f"No maintenance history found for Plant_ID {plant_id}.")
+                    return JsonResponse({"error": "No maintenance history found for the specified plant."}, status=404)
+            else:
+                # Fetch all maintenance history documents if no plant_id is specified
+                history_docs = list(maintenance_history_collection.find({}, {"_id": 0}))
+                if history_docs:
+                    logger.info("Retrieved all maintenance history records.")
+                    return JsonResponse(history_docs, safe=False, status=200)
+                else:
+                    logger.warning("No maintenance history records found.")
+                    return JsonResponse({"error": "No maintenance history records found."}, status=404)
+
+        else:
+            logger.warning(f"Invalid method: {request.method}. Only GET is allowed.")
+            return JsonResponse({"error": "Only GET method is allowed for this endpoint."}, status=400)
+
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while fetching maintenance history: {str(e)}")
+        return JsonResponse({"error": "An unexpected error occurred", "details": str(e)}, status=500)
+
+
+@csrf_exempt
+def generate_analytics_data(request, plant_id, smb_id):
+    try:
+        # Get the current time in Asia/Kolkata timezone
+        kolkata_timezone = pytz.timezone("Asia/Kolkata")
+        current_time = datetime.now(kolkata_timezone)
+
+        # Fetch plant data from solar_plants_collection
+        plant_data = solar_plants_collection.find_one({'Plant_ID': plant_id}, {'SMBCount': 1})
+        if not plant_data:
+            return JsonResponse({'error': 'Plant not found'}, status=404)
+
+        smb_count = int(plant_data.get('SMBCount', 0))  # Get SMBCount from the plant document
+        if smb_count == 0:
+            return JsonResponse({'error': 'No SMBs found for this plant'}, status=404)
+
+        # Fetch SMB data from smb_collection for the given plant_id
+        plant_smb_data = smb_collection.find_one({'PlantID': plant_id}, {'smb_data': 1})
+        if not plant_smb_data or 'smb_data' not in plant_smb_data:
+            return JsonResponse({'error': 'No SMB data found for this plant'}, status=404)
+
+        # Extract the correct SMB entry from the list
+        smb_data = next((smb for smb in plant_smb_data['smb_data'] if smb.get('smb_id') == smb_id), None)
+        if not smb_data:
+            return JsonResponse({'error': f'SMB {smb_id} not found for this plant'}, status=404)
+
+        # Generate real-time data
+        daily_time_slots = [(current_time - timedelta(hours=i)).strftime('%I %p') for i in range(5)]
+        daily_data = [{'time': time_slot, 'energy': random.randint(10, 25), 'temperature': random.randint(10, 25)} for time_slot in daily_time_slots]
+
+        weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        weekly_data = [{'time': weekdays[i % 7], 'energy': random.randint(100, 250), 'temperature': random.randint(10, 25)} for i in range(7)]
+
+        month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        monthly_data = [{'time': month, 'energy': random.randint(100, 250), 'temperature': random.randint(10, 25)} for month in month_names]
+
+        yearly_data = [{'time': str(year), 'energy': random.randint(1000, 2500), 'temperature': random.randint(10, 25)} for year in range(2023, current_time.year + 1)]
+
+        # Generate expected data for the future (next 2 years)
+        expected_years = [str(year) for year in range(current_time.year + 1, current_time.year + 3)]
+        expected_data = {
+            'Daily': [{'time': f"{(current_time + timedelta(days=i)).strftime('%I %p')}", 'energy': random.randint(10, 25), 'temperature': random.randint(10, 25)} for i in range(30)],
+            'Weekly': [{'time': f"Week {i+1}", 'energy': random.randint(100, 250), 'temperature': random.randint(10, 25)} for i in range(52)],
+            'Monthly': [{'time': month_names[i], 'energy': random.randint(100, 250), 'temperature': random.randint(10, 25)} for i in range(12)],
+            'Yearly': [{'time': year, 'energy': random.randint(1000, 2500), 'temperature': random.randint(10, 25)} for year in expected_years]
+        }
+
+        real_time_data = {
+            'Daily': daily_data[::1],
+            'Weekly': weekly_data[::1],
+            'Monthly': monthly_data[::1],
+            'Yearly': yearly_data[::1]
+        }
+
+        smb_final_data = {
+            'smb_id': smb_data['smb_id'],
+            'Power_output': smb_data['Power_output'],
+            'timestamp': smb_data['timestamp'],
+            'real_time_data': real_time_data,
+            'expected_data': expected_data
+        }
+
+        # Check if smb_id exists in analytics_collection
+        existing_analytics = analytics_collection.find_one(
+            {'plant_id': plant_id, 'smb_data.smb_id': smb_id}
+        )
+
+        if existing_analytics:
+            # If smb_id exists, update only the required fields
+            analytics_collection.update_one(
+                {'plant_id': plant_id, 'smb_data.smb_id': smb_id},
+                {'$set': {
+                    'timestamp': current_time.timestamp(),
+                    'smb_data.$.real_time_data': smb_final_data['real_time_data'],
+                    'smb_data.$.expected_data': smb_final_data['expected_data']
+                }}
+            )
+        else:
+            # If smb_id does not exist, push a new SMB entry into smb_data array
+            analytics_collection.update_one(
+                {'plant_id': plant_id},
+                {'$push': {
+                    'smb_data': {
+                        'smb_id': smb_id,
+                        'Power_output': smb_data['Power_output'],
+                        'timestamp': smb_data['timestamp'],
+                        'real_time_data': smb_final_data['real_time_data'],
+                        'expected_data': smb_final_data['expected_data']
+                    }
+                }},
+                upsert=True
+            )
+
+        return JsonResponse({'status': 'success', 'generated_data': smb_final_data})
+
+    except Exception as e:
+        return JsonResponse({'error': f"An error occurred: {str(e)}"}, status=500)
+
