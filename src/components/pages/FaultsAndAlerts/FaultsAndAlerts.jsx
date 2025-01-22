@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -87,7 +87,7 @@ const FaultsAndAlerts = () => {
               </div>
             </div>
 
-            <div className="ml-[250px] w-[1240px] h-[640px] bg-white rounded-2xl p-4">
+            <div className="ml-[250px] w-[1200px] h-[640px] bg-white rounded-2xl p-4">
               {/* Content Area */}
               <div className="w-full h-full p-1">
                 <AnimatePresence mode='wait'>

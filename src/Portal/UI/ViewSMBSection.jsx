@@ -4,14 +4,14 @@ import { useEffect } from "react";
 const ViewSMBSection = ({ smbIndex, StringCount, PanelCount, powerData }) => {
   // Transform the power data to include only the current SMB's strings
   const PowerDataArray = Array.isArray(powerData)
-    ? powerData
-        .find((smb) => smb.smb_id === `${smbIndex + 1}`)?.strings || []
-        .map((item) => ({
-          string_id: item.string_id,
-          voltage: item.voltage || 0,
-          power: item.power_output || 0,
-        }))
-    : [];
+  ? powerData
+      .find((smb) => `${smb.smb_id}` === `${smbIndex + 1}`)?.strings || []
+      .map((item) => ({
+        string_id: item.string_id,
+        voltage: item.voltage || 0,
+        power: item.power_output || 0,
+      }))
+  : [];
 
 
   useEffect(() => {
@@ -59,7 +59,7 @@ const ViewSMBSection = ({ smbIndex, StringCount, PanelCount, powerData }) => {
                 <p>{stringData.power_output} kW</p>
               </div>
             </div>
-            <div className="flex solar-grid-overlay">
+            <div className="flex solar-grid-overlay ">
               {Array.from({ length: PanelCount }).map((_, panelIndex) => (
                 <div
                   key={panelIndex}

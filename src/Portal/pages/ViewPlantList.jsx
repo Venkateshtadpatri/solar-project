@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import  { useState } from 'react'
 import Sidebar from '../UI/Sidebar'
 import { AnimatePresence, motion } from 'framer-motion'
 import PlantDetailsTable from './../Tables/PlantDetailsTable';

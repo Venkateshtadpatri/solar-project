@@ -1,11 +1,9 @@
-/* Global Reset */
 body, html {
   margin: 0;
   padding: 0;
   height: 100%;
 }
 
-/* Ensure root takes full screen */
 #root {
   height: 100%;
   overflow: hidden; /* Consider removing this if dragging needs scrolling */

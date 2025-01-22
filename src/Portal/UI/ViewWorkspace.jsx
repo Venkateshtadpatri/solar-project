@@ -1,75 +1,87 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import ControlPanel from "../../components/hooks/ControlPanel.jsx";
 import axios from "axios";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import ViewSMBSection from "./ViewSMBSection";
-import useDrag from "../../components/hooks/useDrag.jsx";
 import MoonLoader from "react-spinners/MoonLoader";
 
-const ViewWorkspace = ({ SmbCount, StringCount, PanelCount, SelectedPlantId }) => {
+const ViewWorkspace = ({ SmbCount, StringCount, PanelCount, SelectedPlantId, SelectedSMBID }) => {
     const viewworkspaceRef = useRef(null);
     const [scaleFactor, setScaleFactor] = useState(1);
-    const { position, cursorStyle, handleMouseDown, setPosition } = useDrag();
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [loading, setLoading] = useState(false);
     const [powerData, setPowerData] = useState({});
-    const [loading, setLoading] = useState(false); // New state for loading indicator
+
+    const handleZoomIn = useCallback(() => {
+        setScaleFactor((prev) => Math.min(prev * 1.1, 5)); // Limit max zoom
+    }, []);
+
+    const handleZoomOut = useCallback(() => {
+        setScaleFactor((prev) => Math.max(prev * 0.9, 0.5)); // Limit min zoom
+    }, []);
+
+    const handleReset = useCallback(() => {
+        setScaleFactor(1);
+    }, []);
 
     // Fetch power data for the selected plant at a 10-second interval
     useEffect(() => {
-        if (!SelectedPlantId) return; // Do not make the call if no PlantId is selected
+        if (!SelectedPlantId) return;
 
-        const fetchPowerData = async () => {
-            setLoading(true); // Start loading
+        const fetchData = async () => {
+            setLoading(true);
             try {
-                const response = await axios.get(`http://127.0.0.1:8000/api/power_output/${SelectedPlantId}`);
-                setPowerData(response?.data?.data); // Assuming power data is an array from the API
+                const endpoint = SelectedSMBID
+                    ? `http://127.0.0.1:8000/api/get_details_by_smb_id/${SelectedPlantId}/${SelectedSMBID}/`
+                    : `http://127.0.0.1:8000/api/power_output/${SelectedPlantId}`;
+
+                const response = await axios.get(endpoint);
+
+                if (response.data.status === "success") {
+                    setPowerData(response?.data?.data); // Store data based on the response
+                } else {
+                    console.error("API response status not successful", response);
+                }
             } catch (error) {
-                console.error("Error fetching power output data:", error);
+                console.error("Error fetching data:", error);
             } finally {
-                setLoading(false); // Stop loading
+                setLoading(false);
             }
         };
 
-        // Call API every 10 seconds
-        const interval = setInterval(fetchPowerData, 10000);
-        fetchPowerData(); // Call it initially too
+        fetchData();
 
-        return () => clearInterval(interval); // Cleanup interval on component unmount
-    }, [SelectedPlantId]);
-
-    const generateLayout = () => {
-        const layout = [];
-        for (let i = 0; i < SmbCount; i++) {
-            const strings = [];
-            for (let j = 0; j < StringCount; j++) {
-                const panels = Array(PanelCount).fill(0);
-                strings.push(panels);
+        const interval = setInterval(() => {
+            if (SelectedPlantId) {
+                fetchData();
             }
-            layout.push(strings);
+        }, 10000);
+
+        return () => clearInterval(interval);
+    }, [SelectedPlantId, SelectedSMBID]);
+
+    // Generate layout based on SMB selection
+    const generateLayout = () => {
+        if (typeof SmbCount !== "number" || typeof StringCount !== "number" || typeof PanelCount !== "number") {
+            console.error("Invalid values for layout parameters");
+            return [];
         }
-        return layout;
+
+        if (SelectedSMBID) {
+            // Generate layout only for the selected SMB
+            return [
+                Array.from({ length: StringCount }, () => Array(PanelCount).fill(0)),
+            ];
+        }
+
+        // Generate layout for all SMBs if none is specifically selected
+        return Array.from({ length: SmbCount }, () =>
+            Array.from({ length: StringCount }, () => Array(PanelCount).fill(0))
+        );
     };
 
     const layout = generateLayout();
 
     useEffect(() => {
-        const handleZoom = (event) => {
-            event.preventDefault();
-
-            if (!viewworkspaceRef.current) return;
-
-            const rect = viewworkspaceRef.current.getBoundingClientRect();
-            const offsetX = event.clientX - rect.left;
-            const offsetY = event.clientY - rect.top;
-
-            setMousePosition({ x: offsetX, y: offsetY });
-
-            const zoomFactor = event.deltaY < 0 ? 1.1 : 0.9;
-            setScaleFactor((prevScale) => Math.max(0.1, Math.min(prevScale * zoomFactor, 5)));
-        };
-
         const workspaceElement = viewworkspaceRef.current;
         if (workspaceElement) {
             workspaceElement.addEventListener("wheel", handleZoom, { passive: false });
@@ -82,50 +94,48 @@ const ViewWorkspace = ({ SmbCount, StringCount, PanelCount, SelectedPlantId }) =
         };
     }, []);
 
-    // Reset Position on Zoom Change
-    useEffect(() => {
-        setPosition({ x: 0, y: 0 });
-    }, [scaleFactor, setPosition]);
+    const handleZoom = (event) => {
+        event.preventDefault();
+        const zoomFactor = event.deltaY < 0 ? 1.1 : 0.9;
+        setScaleFactor((prev) => Math.max(0.5, Math.min(prev * zoomFactor, 5)));
+    };
 
     return (
-        <div id="workspace" className="min-h-screen custom-background text-white w-full h-full p-1 -z-40 relative">
-            {loading && (
-                <div className="absolute inset-0 flex justify-center items-center z-50 bg-black bg-opacity-50">
-                    <MoonLoader color="#FFF" size={50} />
-                </div>
-            )}
-            <TransformWrapper>
-                <ControlPanel />
-                <TransformComponent>
-                    <div
-                        ref={viewworkspaceRef}
-                        onMouseDown={handleMouseDown}
-                        onMouseMove={(e) => {
-                            const rect = viewworkspaceRef.current?.getBoundingClientRect();
-                            setMousePosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-                        }}
-                        style={{
-                            transform: `scale(${scaleFactor}) translate(${position.x}px, ${position.y}px)`,
-                            transformOrigin: 'center',
-                            cursor: cursorStyle,
-                            position: "relative",
-                            width: "100%",
-                            height: "100%",
-                        }}
-                        className="-ml-[200px]"
-                    >
-                        {layout.map((_, smbIndex) => (
-                            <ViewSMBSection
-                                key={smbIndex}
-                                smbIndex={smbIndex}
-                                StringCount={StringCount}
-                                PanelCount={PanelCount}
-                                powerData={powerData}
-                            />
-                        ))}
+        <div id="workspace" className="min-h-screen absolute flex custom-background text-white w-full p-5 -z-40 scrollbar-corner-sky-500 scrollbar scrollbar-thumb-slate-700 scrollbar-track-slate-300 overflow-x-auto">
+            <ControlPanel
+                onZoomIn={handleZoomIn}
+                onZoomOut={handleZoomOut}
+                onReset={handleReset}
+            />
+            <div
+                ref={viewworkspaceRef}
+                style={{
+                    transform: `scale(${scaleFactor})`,
+                    transformOrigin: "center",
+                    cursor: "grab",
+                    position: "relative",
+                }}
+                className="-ml-[400px] mb-5"
+            >
+                {loading && (
+                    <div className="sticky inset-0 flex justify-center items-center z-50 bg-black bg-opacity-50">
+                        <MoonLoader color="#FFF" size={50} />
                     </div>
-                </TransformComponent>
-            </TransformWrapper>
+                )}
+                {layout.length === 0 ? (
+                    <div className="text-center text-red-500">No data available for the selected plant or SMB.</div>
+                ) : (
+                    layout.map((_, smbIndex) => (
+                        <ViewSMBSection
+                            key={smbIndex}
+                            smbIndex={SelectedSMBID ? parseInt(SelectedSMBID, 10) - 1 : smbIndex}
+                            StringCount={StringCount}
+                            PanelCount={PanelCount}
+                            powerData={powerData}
+                        />
+                    ))
+                )}
+            </div>
         </div>
     );
 };

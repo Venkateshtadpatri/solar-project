@@ -40,21 +40,26 @@ export default function PlantDetailsTable() {
     try {
       const response = await axios.get('http://127.0.0.1:8000/api/solar-plants/');
       const plantsData = response.data.plants;
+  
+      // Ensure data is in the correct format
+      if (!Array.isArray(plantsData) || plantsData.length === 0) {
+        console.log("No data received or incorrect format.");
+        return;
+      }
+  
       setPlants(plantsData);
-      console.log(plantsData);
-      // Update filtered rows to only include PlantID and PlantName
+  
       const updatedRows = plantsData.map(plant => ({
-        PlantID: plant.Plant_ID,
+        PlantID: plant.Plant_ID,  // Ensure key names match API response
         PlantName: plant.Plant_name,
-        // Store the full plant details in each row for access later
-        fullDetails: plant,
+        fullDetails: plant, 
       }));
+  
       setFilteredRows(updatedRows);
-      const count = updatedRows.length; // Update this to count filteredRows correctly
-      dispatch(setPlantCount(count));
-      
+      dispatch(setPlantCount(updatedRows.length));
+  
     } catch (error) {
-      console.log('Error fetching Solar Plant Details: ', error);
+      console.log('Error fetching Solar Plant Details:', error);
     }
   };
 
@@ -91,20 +96,26 @@ export default function PlantDetailsTable() {
   const handleSearchChange = (event) => {
     const query = event.target.value;
     setSearchQuery(query);
-    setFilteredRows(
-      plants
-        .filter(plant =>
-          plant.Plant_ID.toLowerCase().includes(query.toLowerCase()) ||
-          plant.Plant_name.toLowerCase().includes(query.toLowerCase())
-        )
-        .map(plant => ({
-          PlantID: plant.Plant_ID,
-          PlantName: plant.Plant_name,
-          fullDetails: plant, // Include full details for access
-        }))
-    );
-    setCurrentPage(1);
-    setPageInput(1);
+  
+    if (query.trim() === "") {
+      setFilteredRows(plants.map(plant => ({
+        PlantID: plant.Plant_ID,
+        PlantName: plant.Plant_name,
+        fullDetails: plant,
+      })));
+      return;
+    }
+  
+    const filtered = plants.filter(plant =>
+      plant.Plant_ID.toString().toLowerCase().includes(query.toLowerCase()) ||
+      plant.Plant_name.toLowerCase().includes(query.toLowerCase())
+    ).map(plant => ({
+      PlantID: plant.Plant_ID,
+      PlantName: plant.Plant_name,
+      fullDetails: plant,
+    }));
+  
+    setFilteredRows(filtered);
   };
 
   const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
@@ -176,8 +187,8 @@ export default function PlantDetailsTable() {
               {filteredRows.length > 0 ? (
                 filteredRows
                   .slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
-                  .map((row) => (
-                    <tr key={row.PlantID}>
+                  .map((row,index) => (
+                    <tr key={`${row.PlantID}-${index}`}>
                       <td className="border-b-2 border-gray-300 font-bold px-4 py-2 text-center">{row.PlantID}</td>
                       <td className="border-b-2 border-gray-300 font-bold px-4 py-2 text-center">{row.PlantName}</td>
                       <td className="border-b-2 py-1 border-gray-300 font-bold text-sm text-center">

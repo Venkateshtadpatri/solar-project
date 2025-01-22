@@ -9,7 +9,7 @@ import Home from './components/Home/Home';
 import Dashboard from './components/pages/Dashboard/Dashboard';
 import PanelDetails from './components/pages/PanelDetails/PanelDetails';
 import FaultsAndAlerts from './components/pages/FaultsAndAlerts/FaultsAndAlerts';
-import Analysis from './components/pages/Analysis';
+import Analysis from './components/pages/Analytics/Analysis';
 import Maintenance from './components/pages/Maintenance/Maintenance';
 import AIAndAutomation from './components/pages/AIandAutomation';
 import Reports from './components/pages/Reports';
@@ -64,8 +64,8 @@ const App = () => {
     '/access-portal/plant-registration/generate-layout',
     '/access-portal/plant-registration/plant-register',
     '/access-portal/plant-registration/view-plant-layout',
-      '/access-portal/plant-registration/view-weather-data',
-    '/Enter-phone',
+    '/access-portal/plant-registration/view-weather-data',
+    '/Enter-email',
     '/enter-otp',
     '/reset-password',
     '/400',

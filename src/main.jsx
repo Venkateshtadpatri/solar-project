@@ -4,6 +4,7 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import './index.css'
 import store from './redux/index.jsx'
+
 import App from './App.jsx'
 import {WeatherProvider} from "./components/api/WeatherContext.jsx";
 import 'react-toastify/dist/ReactToastify.css';

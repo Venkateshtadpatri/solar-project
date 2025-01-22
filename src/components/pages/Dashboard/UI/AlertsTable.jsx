@@ -1,22 +1,65 @@
-import React from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
 import { ColorAlertIcon } from '../../../icons/icons';
-
-const alertsData = [
-  { id: 'SMB001', fault: 'Dust', severity: 'Warning' },
-  { id: 'SMB006', fault: 'Bird waste', severity: 'Warning' },
-  { id: 'SMB012', fault: 'Crack', severity: 'Critical' },
-  { id: 'SMB019', fault: 'Crack', severity: 'Critical' },
-  { id: 'SMB013', fault: 'Dust', severity: 'Warning' },
-  { id: 'SMB043', fault: 'Bird waste', severity: 'Warning' },
-  { id: 'SMB001', fault: 'Dust', severity: 'Warning' },
-  { id: 'SMB006', fault: 'Bird waste', severity: 'Warning' },
-  { id: 'SMB012', fault: 'Crack', severity: 'Critical' },
-  { id: 'SMB019', fault: 'Crack', severity: 'Critical' },
-  { id: 'SMB013', fault: 'Dust', severity: 'Warning' },
-  { id: 'SMB043', fault: 'Bird waste', severity: 'Warning' }
+import { useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+const columns = [
+  { field: 'smbId', header: 'SMB ID' },
+  { field: 'alertName', header: 'Alert Name' },
+  { field: 'SeverityLevel', header: 'Severity Level' },
 ];
+import { useNavigate } from 'react-router-dom';
 
 const AlertsTable = () => {
+  const isAuth = useSelector((state) => state.auth.isAuthenticated);
+  const PlantId = useSelector((state) => state.auth.PlantId);
+  const [alertsData, setAlertsData] = useState([]);
+  const navigate = useNavigate();
+  const fetchInterval = useRef(null);
+
+  useEffect(() => {
+    if (!isAuth) {
+      navigate('/');
+    } else {
+      fetchAlertHistory();
+      fetchInterval.current = setInterval(fetchAlertHistory, 10000);
+    }
+
+    return () => {
+      clearInterval(fetchInterval.current);
+    };
+  }, [isAuth, navigate]);
+
+  const getStatusColor = (SeverityLevel) => {
+    switch (SeverityLevel) {
+      case 'Warning':
+        return 'bg-yellow-100 border-2 border-yellow-500 text-black';
+      case 'Critical':
+        return 'bg-red-100 border-2 border-red-500 text-black';
+      case 'Online':
+        return 'bg-green-100 border-2 border-green-500 text-black';
+      default:
+        return 'bg-gray-200 text-black';
+    }
+  };
+
+  const fetchAlertHistory = async () => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:8000/api/alert_history/${PlantId}`);
+      const alertsData = response.data.GeneratedData; // Adjusted according to backend response
+      // Map through the alerts data to match table columns
+      const rows = alertsData.map((alert) => ({
+        alertId: alert.alertID,
+        smbId: alert.SMB_ID,
+        alertName: alert.alert_name,
+        SeverityLevel: alert.severity_level,
+      }));
+
+      setAlertsData(rows);
+    } catch (error) {
+      console.error('Error fetching alerts:', error);
+    }
+  };
   return (
     <div className="bg-gradient-to-br from-gray-100 to-gray-300 shadow-md rounded-2xl p-4" style={{ height: '450px', width: '390px' }}>
       <div className="text-2xl mb-2 font-semibold flex items-center">
@@ -26,10 +69,15 @@ const AlertsTable = () => {
       <div>
         <table className="w-full text-left table-fixed">
           <thead className="sticky top-0 bg-blue-900 text-white">
-            <tr>
-              <th className="ml-4 p-2 rounded-tl-md">SMB ID</th>
-              <th className="ml-10 p-2">Fault Name</th>
-              <th className="ml-10 p-2 rounded-tr-md">Severity Level</th>
+          <tr>
+              {columns.map((col, index) => (
+                <th
+                  key={col.field}
+                  className={`px-2 py-3 font-bold text-sm ${index === 0 ? 'rounded-tl-lg' : ''} ${index === columns.length - 1 ? 'rounded-tr-lg' : ''}`}
+                >
+                  {col.header}
+                </th>
+              ))}
             </tr>
           </thead>
         </table>
@@ -40,13 +88,16 @@ const AlertsTable = () => {
           <tbody>
             {alertsData.map((alert, index) => (
               <tr key={index} className="bg-white">
-                <td className="border-b font-bold border-gray-900 py-2 text-sm">{alert.id}</td>
-                <td className="border-b border-gray-900 py-2 text-sm font-bold">{alert.fault}</td>
+                <td className="border-b font-bold border-gray-900 py-2 text-sm pl-5">{alert.smbId}</td>
+                <td className="border-b border-gray-900 py-2 text-sm font-bold">{alert.alertName}</td>
                 <td className="border-b border-black py-2">
                   <div
-                    className={`w-20 p-1 rounded-xl mx-auto font-bold text-sm ${alert.severity === 'Critical' ? 'bg-red-100 border-2 border-red-500' : 'bg-yellow-100 border-2 border-yellow-500'}`}
+                    className={`w-20 p-1 rounded-xl mx-auto font-bold text-sm 
+                      
+                     ${getStatusColor(alert.SeverityLevel)}
+                      `}
                   >
-                    {alert.severity}
+                    {alert.SeverityLevel}
                   </div>
                 </td>
               </tr>

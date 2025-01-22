@@ -98,21 +98,43 @@ const Dashboard = () => {
                     Live TimeStamp: <DigitalClock />
                   </div>
                 </div>
-                <ul className="flex flex-row justify-end">
+                <ul className="flex flex-row justify-end items-center relative">
                   <li>
-                    <div onClick={handleToggleClick} className="flex items-center cursor-pointer text-xl p-2 rounded-lg">
-                      <span>Hello {user_id}</span>
-                      <span className="ml-auto text-xs">
+                    <div
+                      onClick={handleToggleClick}
+                      className="flex items-center cursor-pointer text-xl p-2 rounded-lg hover:bg-gray-200 transition-colors"
+                      role="button"
+                      aria-haspopup="true"
+                      aria-expanded={toggle}
+                    >
+                      <span>Hello, {user_id}</span>
+                      <span className="ml-2 text-xs">
                         {toggle ? '▲' : '▼'}
                       </span>
                     </div>
                     {toggle && (
-                      <ul className="absolute w-[150px] bg-white shadow-md rounded-md mt-1 z-10">
+                      <ul
+                        className="absolute right-0 w-[150px] bg-white shadow-lg rounded-md mt-2 z-10 border border-gray-200"
+                        role="menu"
+                        aria-label="User menu"
+                      >
                         <li>
-                          <button className="block px-4 py-2 text-left w-full hover:bg-gray-100" onClick={() => navigate('settings/')}>Settings</button>
+                          <button
+                            className="block px-4 py-2 text-left w-full text-gray-700 hover:bg-gray-100 transition-colors"
+                            onClick={() => navigate('settings/')}
+                            role="menuitem"
+                          >
+                            Settings
+                          </button>
                         </li>
                         <li>
-                          <button className="block px-4 py-2 text-left w-full hover:bg-gray-100" onClick={logoutHandler}>Logout</button>
+                          <button
+                            className="block px-4 py-2 text-left w-full text-gray-700 hover:bg-gray-100 transition-colors"
+                            onClick={logoutHandler}
+                            role="menuitem"
+                          >
+                            Logout
+                          </button>
                         </li>
                       </ul>
                     )}

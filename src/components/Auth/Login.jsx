@@ -195,31 +195,33 @@ const Auth = ({ onClose }) => {
           <h2 className="text-3xl font-bold mb-8 text-center text-black">Login</h2>
           <form onSubmit={loginHandler}>
             <div className="mb-6">
-              <FormControl fullWidth sx={{ width: "100%", mt: 2 }}>
+            <FormControl fullWidth sx={{ width: "100%", mt: 2 }}>
               <InputLabel id="plant-id-label">Plant-ID *</InputLabel>
               <Select
-                  labelId="plant-id-label"
-                  name="Plant_ID"
-                  value={PlantId}
-                  label="Plant-ID *"
-                  onChange={handlePlantChange}
-                  required
-                  MenuProps={{
-                    PaperProps: {
-                      style: { maxHeight: 200 },
-                    },
-                  }}
+                labelId="plant-id-label"
+                name="Plant_ID"
+                value={PlantId || ""}  // Ensure value is controlled
+                label="Plant-ID *"
+                onChange={handlePlantChange}
+                required
+                MenuProps={{
+                  PaperProps: {
+                    style: { maxHeight: 200 },
+                  },
+                }}
               >
                 <MenuItem value="" disabled>
                   Select PlantID
                 </MenuItem>
-                {Plants.map((plant) => (
-                    <MenuItem key={plant.Plant_ID} value={plant.Plant_ID}>
-                      {plant.Plant_ID}
-                    </MenuItem>
-                ))}
+                {Plants &&
+                  Plants.filter((plant) => plant.Plant_ID) // ✅ Remove null/undefined values
+                    .map((plant) => (
+                      <MenuItem key={plant.Plant_ID} value={plant.Plant_ID}>
+                        {plant.Plant_ID}
+                      </MenuItem>
+                    ))}
               </Select>
-              </FormControl>
+            </FormControl>
             </div>
             <div className="mb-6">
               <TextField
