@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 20px 10px rgba(255, 0, 0, 0);
+  }
+}
+
+.live-dot {
+  width: 12px;
+  height: 12px;
+  background-color: red;
+  border-radius: 50%;
+  animation: live-pulse 1.2s infinite ease-out;
+}
+
+@layer utilities {
+  .custom-background {
+    @apply transition-colors duration-300 ease-in-out;
+  }
+
+  /* Dark Mode Background */
+  .dark .custom-background {
+    background:
+      linear-gradient(-90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(-90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(transparent 3px, #0d1226 3px, #0d1226 78px, transparent 78px),
+      linear-gradient(-90deg, #aaa 1px, transparent 1px),
+      linear-gradient(-90deg, transparent 3px, #0d1226 3px, #0d1226 78px, transparent 78px),
+      linear-gradient(#aaa 1px, transparent 1px),
+      #0d1226;
+    background-size:
+      4px 4px,
+      4px 4px,
+      80px 80px,
+      80px 80px,
+      80px 80px,
+      80px 80px,
+      80px 80px,
+      80px 80px;
+  }
+
+  /* Light Mode Background */
+  .custom-background {
+    background:
+      linear-gradient(-90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+      linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+      linear-gradient(-90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+      linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+      linear-gradient(transparent 3px, #dcdcdc 3px, #dcdcdc 78px, transparent 78px),
+      linear-gradient(-90deg, #000000 1px, transparent 1px),
+      linear-gradient(-90deg, transparent 3px, #dcdcdc 3px, #dcdcdc 78px, transparent 78px),
+      linear-gradient(#000000 1px, transparent 1px),
+      #dcdcdc;
+    background-size:
+      4px 4px,
+      4px 4px,
+      80px 80px,
+      80px 80px,
+      80px 80px,
+      80px 80px,
+      80px 80px,
+      80px 80px;
+  }
+
+  .solar-grid-overlay {
+    position: relative;
+  }
+
+  .solar-grid-overlay::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+      linear-gradient(to right, rgb(0, 0, 0) 2px, transparent 2px) 70% center, /* Vertical line 1 */
+      linear-gradient(to bottom, rgb(0, 0, 0) 2px, transparent 2px) center 50%,
+      linear-gradient(to left, rgb(0, 0, 0) 2px, transparent 2px) 30% center;
+    background-size: 82px 40px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .dark .solar-grid-overlay::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+      linear-gradient(to right, rgba(255, 255, 255) 2px, transparent 2px) 70% center, /* Vertical line 1 */
+      linear-gradient(to bottom, rgba(255, 255, 255) 2px, transparent 2px) center 50%,
+      linear-gradient(to left, rgba(255, 255, 255) 2px, transparent 2px) 30% center;
+    background-size: 82px 40px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+
+  .solar-bg-color {
+    background-color: #313c8b;
+    padding: 0px 30px 0px 30px;
+    border: 2px solid #000000;
+  }
+  .dark .solar-bg-color {
+    background-color: #313c8b;
+    padding: 0px 30px 0px 30px;
+    border: 2px solid #ffffff;
+  }
+
+  .grid-template-columns {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  #workspace {
+    z-index: 0; /* Ensure it sits below higher-priority elements like modals */
+    width: 100%;
+    height: 100%;
+    padding-top: 50px; /* Ensure content is not hidden behind the header */
+
+  }
+  .viewWorkspace-content {
+    width: max-content; /* Expands to fit children */
+    height: max-content;
+    min-width: 100vw;
+    min-height: 100vh;
+    padding-bottom: 50px; /* Extra space at bottom for smooth scrolling */
+}
+
+  /* Responsive Design for Solar Panels Grid */
+  .grid {
+    display: grid;
+    gap: 30px; /* Adjust spacing between elements */
+  }
+
+}
