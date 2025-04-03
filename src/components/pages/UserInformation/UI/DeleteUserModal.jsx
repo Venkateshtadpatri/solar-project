@@ -18,6 +18,26 @@ const modalVariants = {
   },
 };
 
+/**
+ * A modal component that is used to delete a user from the database.
+ *
+ * It renders a modal dialog with a confirmation message asking if the user is sure
+ * they want to delete the specified user. If the user clicks "Yes, Delete", the
+ * component sends a DELETE request to the backend API to delete the user. If the
+ * request is successful, the component displays a success toast notification and
+ * closes the modal. If the request fails, the component displays an error toast
+ * notification.
+ *
+ * The component requires the following props:
+ *   - `showModal`: a boolean indicating whether the modal should be shown or not.
+ *   - `handleCloseModal`: a callback function that is called when the modal is closed.
+ *   - `user`: the user object that is to be deleted.
+ *
+ * @param {boolean} showModal - Whether the modal should be shown or not.
+ * @param {function} handleCloseModal - A callback function that is called when the modal is closed.
+ * @param {object} user - The user object that is to be deleted.
+ * @returns {JSX.Element} The DeleteUserModal component.
+ */
 const DeleteUserModal = ({ showModal, handleCloseModal, user }) => {
   const handleDeleteUser = async () => {
     try {

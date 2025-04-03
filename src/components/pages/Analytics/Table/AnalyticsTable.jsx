@@ -12,6 +12,22 @@ const columns = [
   { field: 'ViewGraph', header: 'View Graph', align: 'right' },
 ];
 
+/**
+ * AnalyticsTable component:
+ *
+ * This component displays a paginated table of SMB data associated with a plant.
+ * It fetches data from a backend API and updates every 10 seconds.
+ * The table supports searching, pagination, and displays status with color coding.
+ * 
+ * - Utilizes `useSelector` to access authentication state and selected plant ID.
+ * - Redirects to home if the user is not authenticated.
+ * - Fetches SMBs data and transforms it into a table format.
+ * - Supports search functionality to filter table data based on SMB ID.
+ * - Implements pagination with controls for navigating pages and input for direct page access.
+ * - Status is visually represented with different colors based on severity.
+ *
+ * @returns {JSX.Element} The AnalyticsTable component.
+ */
 const AnalyticsTable = () => {
   const navigate = useNavigate();
   const isAuth = useSelector((state) => state.auth.isAuthenticated);
@@ -36,6 +52,14 @@ const AnalyticsTable = () => {
     fetchGraphData();
   }, []); // Fetch data when the component is mounted
 
+  /**
+   * Fetches graph data from the backend API and updates the component state.
+   * The function makes a GET request to the API to fetch the data for the given
+   * plant ID. It will return early if the request is not successful. If the
+   * request is successful, it will update the filteredRows state with the
+   * received data. If the request fails or there is no data available, it will
+   * log an error message to the console.
+   */
   const fetchGraphData = async () => {
     try {
       const response = await axios.get('http://127.0.0.1:8000/api/get-all-smbs/SP-2025-0001');
@@ -54,6 +78,13 @@ const AnalyticsTable = () => {
     }
   };
 
+  /**
+   * Handles the click event on the "View Graph" button.
+   * 
+   * The function sets the selected SMB ID and frequency to the values of the
+   * clicked row, and shows the graph modal.
+   * @param {object} row The row object containing the SMB ID and other data.
+   */
   const handleViewGraphClick = (row) => {
     setSelectedSmbId(row.smbId);
     setSelectedFrequency('daily'); // You can adjust this if you want dynamic frequency
@@ -65,10 +96,24 @@ const AnalyticsTable = () => {
   const currentRows = filteredRows.slice(indexOfFirstRow, indexOfLastRow);
   const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
 
+  /**
+   * Closes the graph modal and resets the selected SMB ID to an empty string.
+   *
+   * This function is called when the user clicks the "Close" button in the
+   * graph modal. It sets the `showGraphModal` state to `false`, which hides the
+   * modal, and resets the `selectedSmbId` state to an empty string.
+   */
   const handleCloseModal = () => {
     setShowGraphModal(false);
   };
 
+  /**
+   * Handles the click event on the "previous page" button.
+   * When the button is clicked, it decrements the `currentPage` state variable
+   * and updates the `pageInput` state variable with the new page number as a
+   * string.
+   * @returns {undefined}
+   */
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -76,12 +121,27 @@ const AnalyticsTable = () => {
     }
   };
 
+  /**
+   * Handles the click event on the "next page" button.
+   * When the button is clicked, it increments the `currentPage` state variable
+   * and updates the `pageInput` state variable with the new page number as a
+   * string.
+   * @returns {undefined}
+   */
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
       setPageInput((currentPage + 1).toString());
     }
   };
+
+/**
+ * Handles the input change event for the page input field.
+ * Updates the `pageInput` state variable if the input value is a valid number.
+ *
+ * @param {Event} event - The input change event.
+ * @returns {undefined}
+ */
 
   const handlePageInputChange = (event) => {
     const value = event.target.value;
@@ -90,6 +150,15 @@ const AnalyticsTable = () => {
     }
   };
 
+  /**
+   * Handles the form submission event for the page input form.
+   * When the form is submitted, it prevents the default event from
+   * occurring and updates the `currentPage` state variable with the
+   * value of the `pageInput` state variable if it is a valid number
+   * within the range of the total number of pages.
+   * @param {Event} event - The form submission event.
+   * @returns {undefined}
+   */
   const handlePageInputSubmit = (event) => {
     event.preventDefault();
     const page = Number(pageInput);

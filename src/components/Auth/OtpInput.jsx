@@ -1,4 +1,6 @@
-import React, { useState, useRef, useEffect, forwardRef } from "react";
+/* eslint-disable react/prop-types */
+/* eslint-disable react/display-name */
+import  { useState, useRef, useEffect, forwardRef } from "react";
 
 /**
  * A component to render an OTP input with the given length.
@@ -19,6 +21,12 @@ const OtpInput = forwardRef(({ length = 6, onOtpSubmit = () => {} }, ref) => {
     }
   }, [ref]);
 
+  /**
+   * Handles a change in one of the OTP input fields.
+   * @param {number} index The index of the input field that changed.
+   * @param {React.ChangeEvent<HTMLInputElement>} e The change event.
+   * @returns {void}
+   */
   const handleChange = (index, e) => {
     const value = e.target.value;
 
@@ -40,6 +48,15 @@ const OtpInput = forwardRef(({ length = 6, onOtpSubmit = () => {} }, ref) => {
     }
   };
 
+/**
+ * Handles keydown events for OTP input fields, specifically managing
+ * the focus behavior when the "Backspace" key is pressed. If the current
+ * input is empty and it is not the first input, the focus is moved to
+ * the previous input field.
+ *
+ * @param {number} index - The index of the current input field.
+ * @param {KeyboardEvent} e - The keyboard event triggered by the keydown action.
+ */
   const handleKeyDown = (index, e) => {
     // Backspace handling
     if (e.key === "Backspace") {

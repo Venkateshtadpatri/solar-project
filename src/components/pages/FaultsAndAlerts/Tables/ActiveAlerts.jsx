@@ -13,6 +13,24 @@ const columns = [
   { field: 'ActionRequired', header: 'Action Required' },
 ];
 
+/**
+ * ActiveAlerts component:
+ *
+ * This component displays a paginated table of active alerts for a specific plant.
+ * It fetches data from a backend API and updates every 10 seconds.
+ * The table supports searching, pagination, and styles alerts based on severity.
+ *
+ * - Utilizes `useSelector` to access authentication state and selected plant ID.
+ * - Redirects to home if the user is not authenticated.
+ * - Fetches active alerts data and transforms it into a table format.
+ * - Supports search functionality to filter table data based on SMB ID, String ID,
+ *   Alert Name, and Severity Level.
+ * - Implements pagination with controls for navigating pages and input for direct page access.
+ * - Alerts are visually represented with different colors based on severity level.
+ *
+ * @returns {JSX.Element} The ActiveAlerts component.
+ */
+
 const ActiveAlerts = () => {
   const isAuth = useSelector((state) => state.auth.isAuthenticated);
   const PlantId = useSelector((state) => state.auth.PlantId);
@@ -37,6 +55,14 @@ const ActiveAlerts = () => {
     };
   }, [isAuth, navigate]);
 
+  /**
+   * Returns a string representing the CSS class names for a given status.
+   * The class names are compatible with Tailwind CSS and can be used to style
+   * table cells based on the status of the alert.
+   *
+   * @param {string} SeverityLevel The status of the alert.
+   * @returns {string} A string of CSS class names.
+   */
   const getStatusColor = (SeverityLevel) => {
     switch (SeverityLevel) {
       case 'Warning':
@@ -52,6 +78,16 @@ const ActiveAlerts = () => {
 
   const fetchAlerts = async () => {
     try {
+/**
+ * Fetches active alerts data from the backend API and updates the `filteredRows` state.
+ *
+ * This asynchronous function makes a GET request to the backend API to retrieve
+ * a list of active alerts associated with the currently selected plant. Upon a
+ * successful request, the `filteredRows` state is updated with the data received.
+ * If the request fails, an error message is logged to the console.
+ *
+ * @returns {Promise<void>} A promise that resolves when data fetching is complete.
+ */
       const response = await axios.get(`http://127.0.0.1:8000/api/active_alerts/${PlantId}`);
       const alertsData = response.data.alerts; // Adjusted according to backend response
 
@@ -72,6 +108,15 @@ const ActiveAlerts = () => {
     }
   };
 
+  /**
+   * Handles changes to the search input field.
+   *
+   * When the user types in the search input field, this function is called.
+   * It filters the `filteredRows` state to only include rows that match
+   * the search query.
+   *
+   * @param {Event} event The event triggered when the user types in the input field.
+   */
   const handleSearchChange = (event) => {
     const query = event.target.value;
     setSearchQuery(query);
@@ -93,6 +138,14 @@ const ActiveAlerts = () => {
   const currentRows = filteredRows.slice(indexOfFirstRow, indexOfLastRow);
   const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
 
+/**
+ * Decrements the current page number by 1 if the current page is greater than 1.
+ * Updates both the `currentPage` and `pageInput` state variables to reflect
+ * the new page number.
+ *
+ * @returns {undefined}
+ */
+
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -100,6 +153,14 @@ const ActiveAlerts = () => {
     }
   };
 
+/**
+ * Increments the current page number by 1 if the current page is less than
+ * the total number of pages.
+ * Updates both the `currentPage` and `pageInput` state variables to reflect
+ * the new page number.
+ *
+ * @returns {undefined}
+ */
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -107,12 +168,30 @@ const ActiveAlerts = () => {
     }
   };
 
+/**
+ * Handles the input change event for the page input field.
+ * If the input value is a valid number, it updates the `pageInput` state
+ * variable with the new value.
+ * 
+ * @param {Event} event - The input change event.
+ */
+
   const handlePageInputChange = (event) => {
     const value = event.target.value;
     if (/^\d*$/.test(value)) {
       setPageInput(value);
     }
   };
+
+/**
+ * Handles the form submission event for the page input form.
+ * Prevents the default form submission behavior and updates the
+ * `currentPage` state variable with the value from `pageInput`
+ * if it is a valid number within the range of total pages.
+ *
+ * @param {Event} event - The form submission event.
+ * @returns {undefined}
+ */
 
   const handlePageInputSubmit = (event) => {
     event.preventDefault();

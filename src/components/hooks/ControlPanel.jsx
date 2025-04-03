@@ -1,5 +1,14 @@
 /* eslint-disable react/prop-types */
 
+/**
+ * A component that renders a control panel with zoom-in, zoom-out and reset buttons.
+ *
+ * @param {function} onZoomIn - a function that is called when the zoom-in button is clicked.
+ * @param {function} onZoomOut - a function that is called when the zoom-out button is clicked.
+ * @param {function} onReset - a function that is called when the reset button is clicked.
+ *
+ * @returns {ReactElement} - a React element representing the control panel.
+ */
 const ControlPanel = ({ onZoomIn, onZoomOut, onReset }) => {
     return (
         <div className="top-[100px] fixed left-[30px] z-10 flex flex-col items-center space-y-2">

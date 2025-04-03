@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import { motion, AnimatePresence } from 'framer-motion';
 
 const backdropVariants = {
@@ -14,9 +16,34 @@ const modalVariants = {
   },
 };
 
+/**
+ * A modal component to delete an admin.
+ *
+ * @param {{ showModal: boolean, handleCloseModal: function, admin: object }} props
+ * @returns {JSX.Element}
+ *
+ * This component renders a modal when the `showModal` prop is true, and
+ * displays a confirmation message to the user. If the user confirms the
+ * deletion, it sends a DELETE request to the server with the admin's PlantID
+ * and username as the request body. If the response is successful, it closes
+ * the modal. If the response is not successful, it will display an error message
+ * to the user.
+ */
 const AdminDeleteModal = ({ showModal, handleCloseModal, admin }) => {
   const handleDeleteAdmin = async (e) => {
     try {
+  /**
+   * Handles the delete event for an admin.
+   *
+   * This function sends a DELETE request to the server with the admin's PlantID
+   * and username as the request body. If the response is successful, it closes
+   * the modal. If the response is not successful, it will display an error message
+   * to the user.
+   *
+   * @param {React.FormEvent<HTMLFormElement>} e - The form event.
+   *
+   * @returns {Promise<void>} A promise that resolves when the deletion is complete.
+   */
       const response = await fetch(`http://127.0.0.1:8000/api/delete-admin/`, {
         method: 'DELETE',
         headers: {

@@ -3,6 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from './UI/Sidebar';
 import CountUp from 'react-countup';
 
+/**
+ * AccessPortal is a component that provides a dashboard for the access portal.
+ *
+ * It renders a sidebar with navigation links and a main content area with
+ * cards displaying the admin and plant counts. The cards also have buttons
+ * to view the respective lists or register a new admin or plant.
+ *
+ * The component uses the `useNavigate` hook from `react-router-dom` to
+ * navigate to the respective pages when the buttons are clicked.
+ *
+ * The component uses the `CountUp` component from `react-countup` to animate
+ * the count of admins and plants.
+ *
+ * The component uses the `AnimatePresence` component from `framer-motion` to
+ * animate the presence of the sidebar and main content area.
+ */
 const AccessPortal = () => {
   const navigate = useNavigate();
   // const adminCount = 150; // Example data

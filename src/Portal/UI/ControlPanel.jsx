@@ -1,5 +1,13 @@
 import { useControls } from "react-zoom-pan-pinch";
 
+/**
+ * A component that renders a control panel with zoom-in, zoom-out and reset buttons.
+ *
+ * It uses the `useControls` hook from `react-zoom-pan-pinch` to get the functions to
+ * manipulate the transform of the wrapped element.
+ *
+ * @returns {ReactElement} - a React element representing the control panel.
+ */
 const ControlPanel = () => {
     const { zoomIn, zoomOut, resetTransform } = useControls();
 

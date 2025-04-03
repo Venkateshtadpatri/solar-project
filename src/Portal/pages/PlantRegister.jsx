@@ -25,6 +25,34 @@ import { motion } from 'framer-motion';
 import {Bounce, toast} from "react-toastify";
 import { MoonLoader } from 'react-spinners';
 
+/**
+ * Handles the registration of a solar plant.
+ * The component renders a form with various fields that must be filled out,
+ * and a button to submit the form.
+ * The component also displays a list of countries, states, and cities based
+ * on the user's selection.
+ * The component uses the `debounce` function to delay the loading of the
+ * states and cities lists until the user has finished typing.
+ * The component uses the `useEffect` hook to load the countries list when the
+ * component mounts, and to load the states and cities lists when the user
+ * selects a country.
+ * The component uses the `useState` hook to keep track of the user's input in
+ * the form fields, and the selected country, state, and city.
+ * The component uses the `useRef` hook to create a reference to the file
+ * input element, so that the component can reset the file input when the
+ * user submits the form.
+ * The component uses the `useCallback` hook to memoize the `fetchCountries`,
+ * `fetchStates`, and `fetchCities` functions, so that they are not recreated
+ * on every render.
+ * The component uses the `useMemo` hook to memoize the `countries`, `states`,
+ * and `cities` lists, so that they are not recreated on every render.
+ * When the user submits the form, the component sends a POST request to the
+ * server with the form data, and displays a success message if the request is
+ * successful.
+ * If the request is not successful, the component displays an error message.
+ * The component also displays a loading animation while the request is being
+ * sent.
+ */
 const PlantRegister = () => {
   const [PlantName, setPlantName] = useState('');
   const [Address, setAddress] = useState('');
@@ -115,13 +143,34 @@ const PlantRegister = () => {
     maximumSignificantDigits: 3,
   });
 
+  /**
+   * Handles changes to the plant capacity input field.
+   *
+   * @param {number} newValue - The new value of the plant capacity input field.
+   */
   const handlePlantCapacityChange = (newValue) => {
     setPlantCapacity(newValue);
   };
 
+  /**
+   * Handles changes to the land area input field.
+   *
+   * @param {number} value - The new value of the land area input field.
+   */
   const handleLandAreaChange = (value) => {
     setLandArea(value);
   };
+  /**
+   * Handles the form submission of the solar plant registration form.
+   *
+   * This function prevents the default form submission behavior, creates a
+   * FormData object to handle form data and file uploads, and sends the form
+   * data to the backend API via Axios. It also handles the response from the
+   * backend, displaying a success message if the registration is successful or
+   * an error message if there's an issue with the registration.
+   *
+   * @param {Event} event - The event object from the form submission event.
+   */
   const handleRegister = async (event) => {
     event.preventDefault();
     

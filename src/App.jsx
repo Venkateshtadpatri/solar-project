@@ -12,7 +12,7 @@ import FaultsAndAlerts from './components/pages/FaultsAndAlerts/FaultsAndAlerts'
 import Analysis from './components/pages/Analytics/Analysis';
 import Maintenance from './components/pages/Maintenance/Maintenance';
 import AIAndAutomation from './components/pages/AIandAutomation';
-import Reports from './components/pages/Reports';
+import Reports from './components/pages/Reports/Reports';
 import UserInformation from './components/pages/UserInformation/UserInformation';
 import UserSettings from './components/pages/UserSettings';
 import Support from './components/pages/Support';

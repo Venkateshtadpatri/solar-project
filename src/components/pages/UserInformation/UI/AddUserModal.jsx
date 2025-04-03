@@ -22,6 +22,22 @@ const modalVariants = {
   },
 };
 
+
+/**
+ * AddUserModal component.
+ * This component renders a modal for adding a new user. It includes fields 
+ * for email, phone, password, and re-entered password. It validates the 
+ * phone number and password, and displays appropriate error messages if 
+ * validation fails. On successful submission, it sends a POST request to 
+ * add the user and triggers the onUserAdded callback with the new user 
+ * data. Shows loading state while the request is in progress.
+*
+* @param {boolean} showModal - Determines if the modal should be displayed.
+* @param {function} handleCloseModal - Function to close the modal.
+* @param {function} onUserAdded - Callback function triggered when a user 
+* is successfully added.
+* @returns {JSX.Element} The rendered AddUserModal component.
+*/
 // eslint-disable-next-line react/prop-types
 const AddUserModal = ({ showModal, handleCloseModal, onUserAdded }) => {
   const [email, setEmail] = useState('');

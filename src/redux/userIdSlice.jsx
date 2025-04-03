@@ -6,9 +6,16 @@ const userIdSlice = createSlice({
     userId: '',
   },
   reducers: {
+    /**
+     * Set the user ID in the state
+     * @param {string} action.payload the user ID to set
+     */
     setUserId: (state, action) => {
       state.userId = action.payload;
     },
+    /**
+     * Clear the user ID in the state
+     */
     clearUserId: (state) => {
       state.userId = '';
     },

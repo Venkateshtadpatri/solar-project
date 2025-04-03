@@ -4,6 +4,6 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    include: ['react', 'react-dom','chunk-EWTE5DHJ'],
+    include: ['react', 'react-dom'],
   },   
 });

@@ -4,27 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Side from '../../../components/Home/Bar/Side';
-import UserInformationTable from './Tables/UserInformationTable'; // Import the UserInformationTable component
-import LoginHistory from './Tables/LoginHistory';
+import ReportGeneration from './Tabs/ReportGeneration';
+import ReportList from './Tabs/ReportList';
+import axios from "axios";
 
 /**
- * A page component that displays user information and login history.
- * @returns {JSX.Element} The UserInformation component.
- * @example
- * import { UserInformation } from '../components/pages/UserInformation';
+ * Reports component:
  *
- * const Example = () => {
- *     return (
- *         <div>
- *             <UserInformation />
- *         </div>
- *     );
- * }
- */
-/**
- * UserInformation component:
- *
- * This component renders a page with two tabs, 'User Information' and 'Login History'.
+ * This component renders a page with two tabs, 'Report Generation' and 'Report List'.
  * It uses the `useSelector` hook to check if the user is authenticated and redirect to
  * the home page if not.
  * It uses the `useState` hook to manage the active tab state.
@@ -35,10 +22,13 @@ import LoginHistory from './Tables/LoginHistory';
  * content.
  * It renders the active component inside the content area.
  */
-const UserInformation = () => {
+
+const Reports = () => {
   const isAuth = useSelector((state) => state.auth.isAuthenticated);
+  const PlantId = useSelector((state) => state.auth.PlantId);
+  const [PlantName, setPlantName] = useState('');
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('User Information'); // State to manage the active component
+  const [activeTab, setActiveTab] = useState('Report Generation'); // State to manage the active component
 
   useEffect(() => {
     if (!isAuth) {
@@ -46,6 +36,29 @@ const UserInformation = () => {
     }
   }, [isAuth, navigate]);
 
+  useEffect(() => {
+  /**
+   * Fetches the plant name from the backend API based on the currently selected
+   * PlantId.
+   *
+   * This function makes a GET request to the backend API to fetch the plant name
+   * associated with the current PlantId. If the request is successful, it sets
+   * the `PlantName` state to the response data.
+   *
+   * @returns {Promise<void>} A promise that resolves when the plant name is fetched.
+   */
+    const fetchPlantDetails = async () => {
+      if (!PlantId) return; // Don't fetch if no PlantId is selected
+
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/get-details/${PlantId}/`);
+        setPlantName(response.data.data.PlantName); // Set plant details
+      } catch (error) {
+        console.error("Error fetching plant name:", error);
+      }
+    };
+    fetchPlantDetails().then(() => {});
+  }, [PlantId]);
   // Animations for tab content
   const pageVariants = {
     initial: { opacity: 0},  // Start hidden and to the right
@@ -55,11 +68,11 @@ const UserInformation = () => {
 
   // Function to render the active component based on the activeTab state
   const renderActiveComponent = () => {
-    if (activeTab === 'User Information') {
-      return <UserInformationTable isAuth={isAuth} />;
+    if (activeTab === 'Report Generation') {
+      return <ReportGeneration isAuth={isAuth} PlantName={PlantName} />;
     }
-    if (activeTab === 'Login History') {
-      return <LoginHistory isAuth={isAuth} />;
+    if (activeTab === 'Report List') {
+      return <ReportList isAuth={isAuth} />;
     }
     return null; // Fallback if neither tab is selected
   };
@@ -79,23 +92,23 @@ const UserInformation = () => {
              {/* Container for the tabs and content */}
             {/* Tab Navigation */}
             <div className="bg-white w-[400px] rounded-t-3xl flex justify-start ml-[270px]">
-              <div className="w-[200px] h-[60px] rounded-t-3xl bg-white">
+              <div className="w-[300px] h-[60px] rounded-t-3xl bg-white">
                 <button
-                  className={`px-4 w-full h-full flex justify-center py-2 rounded-tl-3xl ${activeTab === 'User Information' ? 'bg-indigo-500 text-white' : 'bg-white text-black'}`}
-                  onClick={() => setActiveTab('User Information')}
+                  className={`px-4 w-full h-full flex justify-center py-2 rounded-tl-3xl ${activeTab === 'Report Generation' ? 'bg-indigo-500 text-white' : 'bg-white text-black'}`}
+                  onClick={() => setActiveTab('Report Generation')}
                 >
                   <div className="mt-2 font-bold text-xl">
-                  User Information
+                  Report Generation
                   </div>
                 </button>
               </div>
               <div className="w-[200px] h-[60px] rounded-t-3xl bg-white">
                 <button
-                  className={`px-4 w-full h-full flex justify-center py-2 rounded-tr-3xl ${activeTab === 'Login History' ? 'bg-indigo-500 text-white' : 'bg-white text-black'}`}
-                  onClick={() => setActiveTab('Login History')}
+                  className={`px-4 w-full h-full flex justify-center py-2 rounded-tr-3xl ${activeTab === 'Report List' ? 'bg-indigo-500 text-white' : 'bg-white text-black'}`}
+                  onClick={() => setActiveTab('Report List')}
                 >
                   <div className="mt-2 font-bold text-xl">
-                  Login History
+                  Report List
                   </div>
                 </button>
               </div>
@@ -126,4 +139,4 @@ const UserInformation = () => {
   );
 };
 
-export default UserInformation;
+export default Reports;

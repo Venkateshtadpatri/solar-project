@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Side from '../../Home/Bar/Side';
 import SMBTable from './Tables/SMBTable'; // Uncomment these once the components are created.
 import PanelTable from './Tables/PanelTable';
-
+import TimePulse from "./UI/TimePulse.jsx";
 
 const PanelDetails = () => {
   const isAuth = useSelector((state) => state.auth.isAuthenticated);
@@ -76,17 +76,18 @@ const PanelDetails = () => {
             </div>
 
             <div className="ml-[250px] w-[1240px] h-[600px] bg-white rounded-2xl p-4">
-              {/* Content Area */}
+
               <div className="w-full h-full p-1">
+                  <TimePulse />
                 <AnimatePresence mode='wait'>
                   <motion.div
-                    key={activeTab}  // Key changes with activeTab, triggering exit and enter animations
-                    variants={pageVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    transition={{ duration: 0.3 }}  // Adjust duration for smoother transitions
-                    className="w-full h-full"
+                      key={activeTab}  // Key changes with activeTab, triggering exit and enter animations
+                      variants={pageVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={{duration: 0.3}}  // Adjust duration for smoother transitions
+                      className="w-full h-full"
                   >
                     {renderActiveComponent()}
                   </motion.div>

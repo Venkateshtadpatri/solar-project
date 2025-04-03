@@ -11,6 +11,22 @@ const columns = [
   { field: 'TotalEnergyOutput', header: 'Total Energy Output' },
 ];
 
+/**
+ * SMBTable component:
+ *
+ * This component displays a paginated table of SMB data associated with a plant.
+ * It fetches data from a backend API and updates every 10 seconds.
+ * The table supports searching, pagination, and displays status with color coding.
+ * 
+ * - Utilizes `useSelector` to access authentication state and selected plant ID.
+ * - Redirects to home if the user is not authenticated.
+ * - Fetches SMBs data and transforms it into a table format.
+ * - Supports search functionality to filter table data based on SMB ID.
+ * - Implements pagination with controls for navigating pages and input for direct page access.
+ * - Status is visually represented with different colors based on severity.
+ *
+ * @returns {JSX.Element} The SMBTable component.
+ */
 const SMBTable = () => {
   const isAuth = useSelector((state) => state.auth.isAuthenticated);
   const PlantId = useSelector((state) => state.auth.PlantId);
@@ -35,6 +51,13 @@ const SMBTable = () => {
       clearInterval(fetchInterval.current);
     };
   }, [isAuth, navigate]);
+  /**
+   * Fetches SMB data from the backend API and sets it to the component state.
+   * The data is fetched at a 10-second interval.
+   * The function only fetches data if the PlantId is set.
+   * The data is transformed into a table format before being set to the state.
+   * If the API request fails, an error message is logged to the console.
+   */
     const fetchSMBs = async () => {
  // Fetch SMBs only if plantId is set
         try {
@@ -69,6 +92,13 @@ const SMBTable = () => {
   const currentRows = filteredRows.slice(indexOfFirstRow, indexOfLastRow);
   const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
 
+/**
+ * Decrements the current page number by 1 if the current page is greater than 1.
+ * Updates both the `currentPage` and `pageInput` state variables to reflect the new page number.
+ *
+ * @returns {undefined}
+ */
+
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -76,12 +106,29 @@ const SMBTable = () => {
     }
   };
 
+  /**
+   * Increments the current page number by 1 if the current page is less than
+   * the total number of pages.
+   * Updates both the `currentPage` and `pageInput` state variables to reflect
+   * the new page number.
+   *
+   * @returns {undefined}
+   */
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
       setPageInput(currentPage + 1);
     }
   };
+
+/**
+ * Handles the input change event for the page input field.
+ * If the input value is a valid number, it updates the `pageInput` state
+ * variable with the new value.
+ * 
+ * @param {Event} event - The input change event.
+ * @returns {undefined}
+ */
 
   const handlePageInputChange = (event) => {
     const value = event.target.value;
@@ -90,6 +137,15 @@ const SMBTable = () => {
     }
   };
 
+  /**
+   * Handles the form submission event for the page input form.
+   * When the form is submitted, it prevents the default event from
+   * occurring and updates the `currentPage` state variable with the
+   * value of the `pageInput` state variable if it is a valid number
+   * within the range of the total number of pages.
+   * @param {Event} event - The form submission event.
+   * @returns {undefined}
+   */
   const handlePageInputSubmit = (event) => {
     event.preventDefault();
     const page = Number(pageInput);
@@ -159,7 +215,7 @@ const SMBTable = () => {
         </div>
        
       </div>
-  <div className="flex gap-[450px] items-center fixed translate-y-[220px]">
+  <div className="flex gap-[450px] items-center fixed translate-y-[180px]">
     <button
         onClick={handlePreviousPage}
         disabled={currentPage === 1}

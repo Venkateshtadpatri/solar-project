@@ -11,6 +11,23 @@ const columns = [
   { field: 'totalEnergyOutput', header: 'Total Energy Output (kWh)', align: 'right' },
 ];
 
+/**
+ * PanelTable component:
+ *
+ * This component displays a paginated table of string data associated with a plant.
+ * It fetches data from a backend API and updates every 10 seconds.
+ * The table supports searching, pagination, and displays status with color coding.
+ * 
+ * - Utilizes `useSelector` to access authentication state and selected plant ID.
+ * - Redirects to home if the user is not authenticated.
+ * - Fetches strings data and transforms it into a table format.
+ * - Supports search functionality to filter table data based on SMB ID, String ID, and status.
+ * - Implements pagination with controls for navigating pages and input for direct page access.
+ * - Status is visually represented with different colors based on severity.
+ *
+ * @returns {JSX.Element} The PanelTable component.
+ */
+
 export default function PanelTable() {
   const isAuth = useSelector((state) => state.auth.isAuthenticated);
   const PlantId = useSelector((state) => state.auth.PlantId);
@@ -35,6 +52,18 @@ export default function PanelTable() {
     };
   }, [isAuth, navigate]);
 
+/**
+ * Returns a string representing CSS classes for background and text color
+ * based on the status provided.
+ *
+ * @param {string} status - The status which can be 'Critical', 'Online', 'Warning', or any other string.
+ * @returns {string} A string containing the CSS classes for styling.
+ * - 'Critical' returns red background and border with black text.
+ * - 'Online' returns green background and border with black text.
+ * - 'Warning' returns yellow background and border with black text.
+ * - Any other status returns gray background.
+ */
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'Critical':
@@ -48,6 +77,12 @@ export default function PanelTable() {
     }
   };
 
+/**
+ * Fetches string data from the backend API and updates the `filteredRows` state.
+ *
+ * @async
+ * @throws Will log an error message in case of a failed API request or unsuccessful response status.
+ */
   const fetchStrings = async () => {
     try {
       const response = await axios.get(`http://127.0.0.1:8000/api/get_all_strings/${PlantId}`);
@@ -90,12 +125,26 @@ export default function PanelTable() {
   const currentRows = filteredRows.slice(indexOfFirstRow, indexOfLastRow);
   const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
 
+  /**
+   * Handles the "previous page" button click by decrementing the `currentPage`
+   * state variable and updating the `pageInput` state variable accordingly.
+   *
+   * @returns {undefined}
+   */
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
       setPageInput(currentPage - 1);
     }
   };
+
+/**
+ * Advances to the next page by incrementing the `currentPage` state variable
+ * and updating the `pageInput` state variable accordingly. The function
+ * ensures that the current page does not exceed the total number of pages.
+ *
+ * @returns {undefined}
+ */
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -104,6 +153,13 @@ export default function PanelTable() {
     }
   };
 
+  /**
+   * Handles the input change event for the page input field.
+   * If the input value is a valid number, it updates the `pageInput` state
+   * variable with the new value.
+   * @param {Event} event - The input change event.
+   * @returns {undefined}
+   */
   const handlePageInputChange = (event) => {
     const value = event.target.value;
     if (/^\d*$/.test(value)) {
@@ -111,6 +167,15 @@ export default function PanelTable() {
     }
   };
 
+  /**
+   * Handles the form submission event for the page input form.
+   * When the form is submitted, it prevents the default event from
+   * occurring and updates the `currentPage` state variable with the
+   * value of the `pageInput` state variable if it is a valid number
+   * within the range of the total number of pages.
+   * @param {Event} event - The form submission event.
+   * @returns {undefined}
+   */
   const handlePageInputSubmit = (event) => {
     event.preventDefault();
     const page = Number(pageInput);
@@ -187,7 +252,7 @@ export default function PanelTable() {
         </div>
 
         {/* Pagination controls */}
-        <div className="flex justify-between items-center mt-1 px-4">
+        <div className="flex justify-between items-center -mt-4 px-4">
           <button
             onClick={handlePreviousPage}
             disabled={currentPage === 1}

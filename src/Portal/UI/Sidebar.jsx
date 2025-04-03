@@ -3,6 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, NavLink, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+/**
+ * Sidebar component:
+ *
+ * This component renders a sidebar with two main sections, 'Plant Registrations' and 'Admin Registrations'.
+ * Each section has a dropdown menu with links to the respective pages.
+ * The component uses the `useLocation` hook to get the current location and update the dropdown state.
+ * The component uses the `motion` library to animate the dropdown menu.
+ * The component uses the `NavLink` component from `react-router-dom` to render the links.
+ * The component uses the `useEffect` hook to update the dropdown state based on the current path.
+ */
 const Sidebar = () => {
   const [isPlantOpen, setPlantOpen] = useState(false);
   const [isAdminOpen, setAdminOpen] = useState(false);

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@mui/material';
@@ -16,6 +17,12 @@ const modalVariants = {
   },
 };
 
+/**
+ * A modal component that displays a plant's details when opened.
+ *
+ * @param {{ showModal: boolean, handleCloseModal: function, plant: object }} props
+ * @returns {JSX.Element}
+ */
 const ViewPlantModal = ({ showModal, handleCloseModal, plant }) => {
   return (
     <AnimatePresence>

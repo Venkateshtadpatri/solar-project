@@ -10,6 +10,22 @@ const columns = [
 ];
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * AlertsTable component:
+ *
+ * This component displays a compact, stylized table of alerts for a specific plant.
+ * It fetches alert history data from a backend API and updates every 10 seconds.
+ * The table visually represents alerts with color coding based on severity level.
+ *
+ * - Utilizes `useSelector` to access authentication state and selected plant ID.
+ * - Redirects to the home page if the user is not authenticated.
+ * - Fetches alert history and transforms it into a table format.
+ * - Implements an interval to periodically refresh alert data.
+ * - Provides a function to return CSS class names for styling alerts based on severity.
+ *
+ * @returns {JSX.Element} The AlertsTable component.
+ */
+
 const AlertsTable = () => {
   const isAuth = useSelector((state) => state.auth.isAuthenticated);
   const PlantId = useSelector((state) => state.auth.PlantId);
@@ -30,6 +46,15 @@ const AlertsTable = () => {
     };
   }, [isAuth, navigate]);
 
+/**
+ * Returns a Tailwind CSS class string that represents the background color, border color, and text color
+ * based on the severity level of the alert. The colors are chosen to visually differentiate the severity
+ * levels and maintain consistency with the application's theme.
+ *
+ * @param {string} SeverityLevel - The severity level of the alert ('Warning', 'Critical', 'Online', etc.).
+ * @returns {string} A Tailwind CSS class string for styling an HTML element based on the severity level.
+ */
+
   const getStatusColor = (SeverityLevel) => {
     switch (SeverityLevel) {
       case 'Warning':
@@ -43,6 +68,13 @@ const AlertsTable = () => {
     }
   };
 
+/**
+ * Fetches alert history data from the backend API and updates the `alertsData` state.
+ * The data is fetched at a 10-second interval.
+ * The function only fetches data if the PlantId is set.
+ * The data is transformed into a table format before being set to the state.
+ * If the API request fails, an error message is logged to the console.
+ */
   const fetchAlertHistory = async () => {
     try {
       const response = await axios.get(`http://127.0.0.1:8000/api/alert_history/${PlantId}`);

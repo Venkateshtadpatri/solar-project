@@ -7,12 +7,34 @@ import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label } from 'recharts';
 
 
+/**
+ * A modal component that displays a graph for the given SMB ID and frequency.
+ *
+ * The graph will be updated every 10 seconds with the latest data.
+ *
+ * @param {boolean} showModal Whether the modal should be shown or not.
+ * @param {function} handleCloseModal Function to call when the modal is closed.
+ * @param {number} smbId The ID of the SMB to fetch the data for.
+ * @param {number} PlantId The ID of the plant to fetch the data for.
+ *
+ * @returns {ReactElement} The modal component.
+ */
 const ViewGraphModal = ({ showModal, handleCloseModal, smbId, PlantId }) => {
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedFrequency, setSelectedFrequency] = useState('Daily');
 
+  /**
+   * Fetches the graph data for the given SMB ID and frequency.
+   *
+   * This function makes a GET request to the backend API to fetch the graph data
+   * for the given SMB ID and frequency. It will return early if the SMB ID is not
+   * provided. If the request is successful, it will update the chartData state with
+   * the received data. If the request fails or there is no data available, it will
+   * set the error state to an appropriate error message.
+   *
+   * */
   const fetchGraphData = async () => {
     if (!smbId) {
       // Return early if smbId is not provided
@@ -52,6 +74,21 @@ const ViewGraphModal = ({ showModal, handleCloseModal, smbId, PlantId }) => {
     }
   }, [smbId]);
 
+  /**
+   * Formats the chart data for the given frequency by combining real-time and expected data.
+   *
+   * This function takes the chart data object and the selected frequency as input.
+   * It will return an array of objects with the following properties:
+   * - time_key: The time key for the data point
+   * - real_time_energy_kwh: The real-time energy data for the given frequency
+   * - expected_energy_kwh: The expected energy data for the given frequency
+   * - real_time_temperature: The real-time temperature data for the given frequency
+   * - expected_temperature: The expected temperature data for the given frequency
+   *
+   * If the selected frequency is not available in the chart data, this function will return an empty array.
+   *
+   * @returns {array} The formatted chart data array.
+   */
   const formatChartData = () => {
     const realTimeData = chartData.real_time_data?.[selectedFrequency];
     const expectedData = chartData.expected_data?.[selectedFrequency];

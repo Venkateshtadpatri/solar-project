@@ -1,5 +1,18 @@
 /* eslint-disable react/prop-types */
 
+/**
+ * Renders a section for a single SMB in the solar panel monitoring view.
+ * The section includes the SMB's image, name, and a grid of its strings.
+ * Each string is displayed as a colored box with its power output in kW.
+ * The box's color is determined by the string's voltage.
+ * The grid is divided into columns based on the number of panels per string.
+ * The component also renders a grid of panels for each string.
+ *
+ * @param {number} smbIndex The index of the current SMB (0-indexed).
+ * @param {number} StringCount The number of strings in the current SMB.
+ * @param {number} PanelCount The number of panels in each string.
+ * @returns {React.ReactElement} The rendered React component.
+ */
 const SMBSection = ({ smbIndex, StringCount, PanelCount }) => {
 
     console.log("String count", StringCount)

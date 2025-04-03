@@ -21,6 +21,26 @@ import Sidebar from "../UI/Sidebar";
 import { motion } from "framer-motion";
 import {Bounce, toast} from "react-toastify";
 
+/**
+ * AdminRegister component:
+ *
+ * This component provides a registration form for administrators. It handles
+ * input for plant ID, email, phone number, and password creation. The component 
+ * manages state for form fields, validation, and loading status. It fetches 
+ * available plant IDs from an API and displays them in a dropdown. The form 
+ * performs client-side validation for password length and matching, and phone 
+ * number format. Upon successful registration, a success message is shown; 
+ * otherwise, an error message is displayed.
+ *
+ * - Utilizes `useSelector` to check authentication state.
+ * - Uses `useEffect` to validate inputs and fetch plant data.
+ * - Displays a loading spinner while processing registration.
+ * - Provides feedback for form submission success or failure using toast notifications.
+ * - Redirects to null if the user is authenticated.
+ *
+ * @returns {JSX.Element} The rendered component with a registration form.
+ */
+
 const AdminRegister = () => {
   const isAuth = useSelector((state) => state.auth.isAuthenticated);
   const [loading, setLoading] = useState(false);
@@ -61,12 +81,35 @@ const AdminRegister = () => {
     };
   }, []);
 
+  /**
+   * Handles the change of the selected plant ID in the dropdown.
+   *
+   * This function updates the `PlantId` state with the selected value from the dropdown.
+   * It also updates the `selectedPlantName` state with the name of the selected plant.
+   *
+   * @param {Event} event - The event object from the select element's change event.
+   */
   const handlePlantChange = (event) => {
     const selectedId = event.target.value;
     setPlantId(selectedId);
     const selectedPlant = Plants.find((plant) => plant.Plant_ID === selectedId);
     setSelectedPlantName(selectedPlant ? selectedPlant.Plant_name : "");
   };
+
+/**
+ * Handles the registration of a new administrator.
+ *
+ * This function is triggered when the registration form is submitted. It prevents
+ * the default form submission behavior, sets a loading state, and sends a POST request
+ * to the backend API with the registration details (PlantId, email, phone, and password).
+ * Upon successful registration, it displays a success toast notification and resets the
+ * form fields. In case of an error, it displays an error toast notification with an
+ * appropriate message based on the error response. The loading state is reset after
+ * the operation completes.
+ *
+ * @param {Event} event - The form submission event.
+ * @returns {Promise<void>} A promise that resolves when the registration process is complete.
+ */
 
   const handleRegister = async (event) => {
     event.preventDefault();
@@ -226,7 +269,7 @@ const AdminRegister = () => {
                         />
                         {!phoneValid && phone !== "" && (
                             <Typography variant="caption" color="error" sx={{ mt: 1, textAlign: "left" }}>
-                              Phone number must be exactly 12 digits
+                              Phone number must be exactly 10 digits
                             </Typography>
                         )}
                       </Box>

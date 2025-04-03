@@ -7,13 +7,22 @@ import { Button, CircularProgress } from "@mui/material";
 import { useSelector } from "react-redux";
 import OtpInput from "./OtpInput"; // Ensure the path is correct
 import {Bounce, toast} from 'react-toastify'; // Import toast
-const ContainerVariants = {
+const ContainerVariants = { 
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { duration: 0.4 } },
   exit: { opacity: 0, transition: { ease: "easeInOut" } }
 };
 
-const EnterOtpPage = () => {
+/**
+ * EnterOtpPage component.
+ * This component is responsible for handling the OTP code submission 
+ * and verification. It will also handle the resend OTP functionality.
+ * It will use the useNavigate hook to navigate to the reset password page 
+ * if the OTP is verified successfully.
+ * 
+ * @returns {JSX.Element}
+ */
+const EnterOtpPage = () => { 
   const [otp, setOtp] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timer, setTimer] = useState(60);
@@ -23,10 +32,25 @@ const EnterOtpPage = () => {
   const userId = useSelector(state => state.userId.userId);
   const inputRef = useRef(null);
 
+  /**
+   * Handle OTP change. This function will be called when the user changes the OTP value.
+   * It will update the OTP state with the new value.
+   * 
+   * @param {string} value - The new OTP value.
+   * @returns {undefined}
+   */
   const handleOtpChange = (value) => {
     setOtp(value);
   };
 
+  /**
+   * Handle OTP submission. This function will be called when the user submits
+   * the OTP form. It will check if the OTP is valid and if so, it will navigate
+   * the user to the reset password page. If the OTP is invalid, it will display
+   * a toast error message.
+   * 
+   * @returns {undefined}
+   */
   const handleOtpSubmit = async () => {
     if (otp.length !== 6) {
       toast.warning("OTP must be 6 digits",{
@@ -81,6 +105,13 @@ const EnterOtpPage = () => {
     }
   };
 
+  
+  /**
+   * Sends a POST request to the server to resend an OTP. The request
+   * contains the user ID and email address. If the request is successful,
+   * a success toast is shown and the timer is reset. If the request fails,
+   * an error toast is shown.
+   */
   const handleResendOtp = async () => {
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/resend_otp/', { user_id: userId, email });

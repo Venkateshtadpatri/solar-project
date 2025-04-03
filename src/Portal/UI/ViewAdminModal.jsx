@@ -20,6 +20,13 @@ const modalVariants = {
   },
 };
 
+/**
+ * A modal component to view admin details.
+ *
+ * @param {{ showModal: boolean, handleCloseModal: function, admin: object }} props
+ * @returns {JSX.Element}
+ */
+
 const ViewAdminModal = ({ showModal, handleCloseModal, admin }) => { 
   return (
     <AnimatePresence>

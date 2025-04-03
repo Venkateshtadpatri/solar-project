@@ -21,6 +21,16 @@ const ContainerVariants = {
   },
 };
 
+/**
+ * This component is the UI for resetting a user's password. It renders a
+ * password reset form that sends a POST request to the backend API to
+ * reset the user's password. The form requires a valid email address and
+ * a new password that must be at least 8 characters long and must match
+ * a confirmation field. If the request is successful, the user is
+ * redirected to the login page and a success message is displayed. If
+ * the request fails, an error message is displayed.
+ * @returns {JSX.Element}
+ */
 const ResetPasswordPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,6 +48,16 @@ const ResetPasswordPage = () => {
     );
   }, [password, confirmPassword]);
 
+/**
+ * Handle the form submission. This function will be called when the user
+ * submits the password reset form. It will check if the password is valid
+ * and if so, it will send a POST request to the backend API to reset the
+ * user's password. If the request is successful, the user is redirected to
+ * the login page and a success message is displayed. If the request fails,
+ * an error message is displayed.
+ * @param {Event} event - The form submission event.
+ * @returns {undefined}
+ */
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!passwordValid || !passwordMatch) return;

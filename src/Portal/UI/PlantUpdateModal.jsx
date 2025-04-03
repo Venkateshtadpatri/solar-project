@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import { useState, useEffect} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -17,6 +17,22 @@ const modalVariants = {
     transition: { delay: 0.2 },
   },
 };
+
+/**
+ * A modal component to update plant details.
+ *
+ * @param {boolean} showModal - Indicates whether the modal should be displayed.
+ * @param {function} handleCloseModal - Function to close the modal.
+ * @param {object} plant - The plant object containing details to be updated.
+ *
+ * @returns {JSX.Element} The rendered component.
+ *
+ * This component allows users to edit and update specific details of a plant,
+ * such as the plant name, primary contact name, and primary contact email.
+ * Changes are only submitted if the corresponding fields are marked as editable.
+ * The component handles form submission and displays success or error messages
+ * based on the outcome of the update operation.
+ */
 
 const PlantUpdateModal = ({ showModal, handleCloseModal, plant }) => {
   const [plantName, setPlantName] = useState('');

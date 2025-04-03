@@ -24,6 +24,10 @@ const authSlice = createSlice({
       state.user_id = action.payload.user_id;
       state.PlantId = action.payload.PlantId; // Store PlantId here
     },
+    /**
+     * Reset the authentication state to its initial state, effectively logging out
+     * @param {object} state - The current state of the authentication slice
+     */
     logout(state) {
       state.isAuthenticated = false;
       state.role = null;

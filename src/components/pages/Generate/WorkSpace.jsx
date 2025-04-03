@@ -6,6 +6,13 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import SMBSection from "./SMBSection";
 import useDrag from "../../hooks/useDrag";
 
+/**
+ * The WorkSpace component is a container for the solar panel monitoring system.
+ * It renders SMBs with their respective strings and panels, and provides zooming and panning functionality.
+ *
+ * @param {object} counts - An object containing the counts of SMBs, strings, and panels.
+ * @returns {JSX.Element} The rendered component.
+ */
 const WorkSpace = ({ counts }) => {
     const workspaceRef = useRef(null);
     const [scaleFactor, setScaleFactor] = useState(1);
@@ -31,6 +38,17 @@ const WorkSpace = ({ counts }) => {
 
     // Zoom Handling
     useEffect(() => {
+/**
+ * Handles zooming functionality within the workspace.
+ *
+ * This function prevents the default scroll behavior and calculates the 
+ * zoom factor based on the scroll direction. It adjusts the scale factor 
+ * to zoom in or out, ensuring it stays within defined bounds.
+ * It also updates the mouse position relative to the workspace.
+ *
+ * @param {WheelEvent} event - The wheel event triggered by the user.
+ */
+
         const handleZoom = (event) => {
             event.preventDefault();
 

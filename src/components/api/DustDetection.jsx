@@ -1,3 +1,13 @@
+/**
+ * Determine the risk level of dust accumulation based on weather conditions.
+ *
+ * @param {object} weather - The weather data as returned by the OpenWeatherMap API.
+ * @returns {object} An object with the risk level and a message, e.g.
+ * {
+ *   riskLevel: 'High',
+ *   message: 'High risk of dust accumulation detected! Maintenance recommended.'
+ * }
+ */
 export const detectDustRisk = (weather) => {
     const { humidity } = weather.main;
     const windSpeed = weather.wind.speed;

@@ -10,6 +10,19 @@ const columns = [
   { field: 'User ID', header: 'User ID', width: '50%' },
   { field: 'LoginTime', header: 'Login Time', width: '40%' }, 
 ];
+/**
+ * A component that displays a user's login history in a table.
+ *
+ * It fetches the login history from the server and renders it in a table with the
+ * following columns: Sno, User ID, and Login Time. The table is scrollable and
+ * responsive to the screen size.
+ *
+ * The component is also authenticated, meaning that it will only render if the user
+ * is logged in. If the user is not logged in, it will redirect to the login page.
+ *
+ * @param {boolean} isAuth Whether the user is authenticated or not.
+ * @returns {JSX.Element} The LoginHistory component.
+ */
 const LoginHistory = ({ isAuth }) => {
   const navigate = useNavigate();
   const [logins, setLogins] = useState([]);
@@ -28,6 +41,17 @@ const LoginHistory = ({ isAuth }) => {
       clearInterval(fetchInterval.current);
     };
   }, [isAuth, navigate]);
+
+/**
+ * Fetches the login history of users for a specific plant from the server.
+ *
+ * This asynchronous function sends a GET request to the backend API to retrieve
+ * the login history of users associated with the current plant ID. The login
+ * history data is then set in the component's state.
+ *
+ * On successful retrieval, the login history is stored in the `logins` state.
+ * If an error occurs during the request, it logs the error message to the console.
+ */
 
   const fetchLoginHistory = async () => {
     try {

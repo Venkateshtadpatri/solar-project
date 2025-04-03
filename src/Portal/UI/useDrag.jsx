@@ -1,5 +1,19 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
+/**
+ * Custom React hook to enable drag-and-drop functionality.
+ *
+ * This hook provides a way to track the position of a draggable element within a defined workspace.
+ * It handles mouse and touch events to update the position state, which reflects the current
+ * coordinates of the element. The hook also manages cursor style changes for user feedback.
+ *
+ * @returns {object} An object containing:
+ *   - position: { x, y } - The current position of the draggable element.
+ *   - cursorStyle: string - The current cursor style based on dragging state.
+ *   - handleMouseDown: function - Function to initiate the drag on mouse down or touch start.
+ *   - setPosition: function - Function to manually set the position.
+ */
+
 const useDrag = () => {
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);

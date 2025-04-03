@@ -22,6 +22,14 @@ const modalVariants = {
   },
 };
 
+/**
+ * A modal component to update a user's details.
+ *
+ * @param {boolean} showModal - Whether to show the modal.
+ * @param {function} handleCloseModal - Function to close the modal.
+ * @param {{ _id: string, username: string, email: string }} user - The user object.
+ * @returns {JSX.Element}
+ */
 const UpdateUserModal = ({ showModal, handleCloseModal, user }) => {
   const dispatch = useDispatch();
 
@@ -40,6 +48,13 @@ const UpdateUserModal = ({ showModal, handleCloseModal, user }) => {
     }
   }, [user]);
 
+/**
+ * Handle form submission for updating user details.
+ *
+ * @param {React.FormEvent<HTMLFormElement>} e - The form event.
+ *
+ * @returns {Promise<void>} A promise that resolves when the user details are updated.
+ */
   const handleSave = async (e) => {
     e.preventDefault();
     setError('');

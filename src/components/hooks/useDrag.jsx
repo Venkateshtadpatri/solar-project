@@ -1,5 +1,18 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
+
+/**
+ * Custom hook to enable drag functionality within a specified workspace.
+ *
+ * @param {object} workspaceRef - A reference to the workspace DOM element.
+ * @param {number} [zoomLevel=1] - The current zoom level to adjust the drag bounds.
+ * @returns {object} An object containing:
+ *   - position: { x, y } - The current position of the draggable element.
+ *   - cursorStyle: string - The current cursor style based on dragging state.
+ *   - handleMouseDown: function - Function to initiate the drag on mouse down or touch start.
+ *   - setPosition: function - Function to manually set the position.
+ */
+
 const useDrag = (workspaceRef, zoomLevel = 1) => {
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);

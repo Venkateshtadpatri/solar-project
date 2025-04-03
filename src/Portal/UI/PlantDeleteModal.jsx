@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { motion, AnimatePresence } from 'framer-motion';
 
 const backdropVariants = {
@@ -14,7 +15,33 @@ const modalVariants = {
   },
 };
 
+/**
+ * A modal component to delete a plant.
+ *
+ * This component renders a modal when the `showModal` prop is true, and
+ * displays a confirmation message to the user. If the user confirms the
+ * deletion, it sends a DELETE request to the server with the plant's ID as
+ * the request body. If the response is successful, it closes the modal.
+ * If the response is not successful, it will display an error message to the user.
+ *
+ * @param {boolean} showModal - Indicates whether the modal should be displayed.
+ * @param {function} handleCloseModal - Function to close the modal.
+ * @param {object} plant - The plant object containing the ID to be deleted.
+ *
+ * @returns {JSX.Element} The rendered component.
+ */
 const PlantDeleteModal = ({ showModal, handleCloseModal, plant }) => {
+/**
+ * Handles the delete event for a plant.
+ *
+ * This function sends a DELETE request to the server with the plant's ID
+ * as the request body. If the response is successful, it closes the modal.
+ * If the response is not successful, it will display an error message to the user.
+ *
+ * @param {React.FormEvent<HTMLFormElement>} e - The form event.
+ *
+ * @returns {Promise<void>} A promise that resolves when the deletion is complete.
+ */
   const handleDeletePlant = async (e) => {
     e.preventDefault();
     // Add your delete logic here

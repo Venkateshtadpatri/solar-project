@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react';
 
+/**
+ * ThemeToggleButton component:
+ *
+ * This component renders a toggle button to switch between light and dark
+ * themes. It uses the `dark` class to toggle the theme and stores the preference
+ * in local storage.
+ *
+ * @returns {JSX.Element} The ThemeToggleButton component.
+ */
 const ThemeToggleButton = () => {
     const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -11,6 +20,14 @@ const ThemeToggleButton = () => {
         }
     }, []);
 
+    /**
+     * Toggles the theme between light and dark.
+     *
+     * When the document has the 'dark' class, it removes it, sets the
+     * local storage theme to 'light', and sets the component state to
+     * false. Otherwise, it adds the 'dark' class, sets the local storage
+     * theme to 'dark', and sets the component state to true.
+     */
     const toggleTheme = () => {
         if (document.documentElement.classList.contains('dark')) {
             document.documentElement.classList.remove('dark');

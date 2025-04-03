@@ -44,6 +44,11 @@ const UserSettings = () => {
 
   // Fetch user details including email
   useEffect(() => {
+  /**
+   * Fetches user details including email from the backend API.
+   *
+   * @returns {Promise<void>} A promise that resolves when the user details are fetched.
+   */
     const fetchUserDetails = async () => {
       try {
         const response = await axios.get(`http://127.0.0.1:8000/api/get-user_details-by-id/${userId}`, {

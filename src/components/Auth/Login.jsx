@@ -16,11 +16,9 @@ const backdropVariants = {
 };
 
 const modalVariants = {
-  hidden: { y: "-100vh", opacity: 0 },
+  hidden: { opacity: 0 },
   visible: {
-    y: "0",
-    opacity: 1,
-    transition: { delay: 0.2 },
+    opacity: 1
   },
 };
 
@@ -180,7 +178,7 @@ const Auth = ({ onClose }) => {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
+        className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
         variants={backdropVariants}
         initial="hidden"
         animate="visible"

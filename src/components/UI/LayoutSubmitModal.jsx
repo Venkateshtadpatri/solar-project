@@ -1,6 +1,28 @@
 /* eslint-disable react/prop-types */
 import axios from "axios";
+/**
+ * LayoutSubmitModal component:
+ *
+ * This component renders a modal that allows the user to confirm submission of layout details.
+ * It takes in the following props:
+ * - `showModal`: A boolean indicating whether the modal should be shown.
+ * - `plant`: The ID of the plant to register the layout for.
+ * - `smbCount`, `stringCount`, `panelCount`: The counts of SMBs, strings, and panels respectively.
+ * - `handleCloseModal`: A function to close the modal.
+ *
+ * The component renders a modal that displays the layout details and asks the user to confirm submission.
+ * If the user confirms, it sends a POST request to the backend API with the layout details.
+ * If the request is successful, it alerts the user with a success message and closes the modal.
+ * If the request fails, it alerts the user with an error message and logs the error to the console.
+ * If the user cancels, it simply closes the modal.
+ */
 const LayoutSubmitModal = ({ showModal, plant, smbCount, stringCount, panelCount, handleCloseModal }) => {
+    /**
+     * Handles the submission of the layout registration form.
+     * Sends a POST request to the backend API with the layout details.
+     * If the request is successful, it alerts the user with a success message and closes the modal.
+     * If the request fails, it alerts the user with an error message and logs the error to the console.
+     */
     const handleRegister = async () => {
         try {
             await axios.post("http://127.0.0.1:8000/app/layout-register/", {

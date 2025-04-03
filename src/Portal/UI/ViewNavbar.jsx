@@ -1,9 +1,29 @@
 import ThemeToggleButton from "./ThemeToggleButton";
 
 /* eslint-disable react/prop-types */
+
+/**
+ * ViewNavbar component:
+ *
+ * This component renders a navbar with two dropdowns for selecting a plant ID and an SMB ID.
+ * It displays the counts of SMBs, strings, and panels for the selected plant or SMB.
+ * The component also renders a ThemeToggleButton for switching between light and dark themes.
+ *
+ * @prop {Array} Plants - A list of plants to populate the plant ID dropdown.
+ * @prop {string} SelectedPlantId - The currently selected plant ID.
+ * @prop {function} setSelectedPlantId - A function to update the selected plant ID in the parent component.
+ * @prop {Array} SMBs - A list of SMBs to populate the SMB ID dropdown.
+ * @prop {string} SelectedSMBID - The currently selected SMB ID.
+ * @prop {function} setSelectedSMBID - A function to update the selected SMB ID in the parent component.
+ * @prop {number} SmbCount - The number of SMBs in the selected plant.
+ * @prop {number} StringCount - The number of strings in the selected plant.
+ * @prop {number} PanelCount - The number of panels in the selected plant.
+ *
+ * @returns {JSX.Element} The rendered navbar component.
+ */
 const ViewNavbar = ({ Plants, SelectedPlantId, setSelectedPlantId, SMBs, setSelectedSMBID, SelectedSMBID, SmbCount, StringCount, PanelCount }) => {
     return (
-        <header className="w-[1513px] h-[75px] bg-[#1e3a8a] sticky top-0 z-50">
+        <header className={`${SelectedPlantId !== "" ? "w-[1520px]" : "w-full"} h-[75px] bg-[#1e3a8a] sticky top-0 z-50`}>
             <div className="flex items-center ml-5 pt-4">
                 <form className="flex items-center">
                     <label htmlFor="Plant_ID" className="font-bold text-lg mr-3 -mt-[20px] text-white">Plant ID:</label>

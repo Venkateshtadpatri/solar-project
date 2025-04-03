@@ -2,6 +2,18 @@ import  { useState } from 'react'
 import Sidebar from '../UI/Sidebar'
 import { AnimatePresence, motion } from 'framer-motion'
 import PlantDetailsTable from './../Tables/PlantDetailsTable';
+/**
+ * ViewPlantList component:
+ *
+ * This component renders a page with a single tab, 'View Plant List'.
+ * It uses the `useState` hook to manage the active tab state.
+ * It defines an `renderActiveComponent` function to render the active component based
+ * on the activeTab state.
+ * It uses the `AnimatePresence` component from Framer Motion to animate the tab content.
+ * It renders the tab navigation and content area with a container for the tabs and
+ * content.
+ * It renders the active component inside the content area.
+ */
 const ViewPlantList = () => {
   const [active, setActive] = useState('View Plant List');
   const pageVariants = {
@@ -11,6 +23,12 @@ const ViewPlantList = () => {
   }; 
   const renderActiveComponent = () => {
     if (active === 'View Plant List') {
+  /**
+   * Function to render the active component based on the active state.
+   * If the active state is 'View Plant List', it renders the PlantDetailsTable component.
+   * If the active state is neither of the above, it returns null.
+   * @returns {JSX.Element | null} The rendered active component or null.
+   */
       return <PlantDetailsTable />;
     }
     return null; // Fallback if neither tab is selected

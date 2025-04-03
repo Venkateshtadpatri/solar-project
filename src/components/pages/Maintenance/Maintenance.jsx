@@ -30,6 +30,13 @@ const Maintenance = () => {
     animate: { opacity: 1},    // Fade in and slide to position
     exit: { opacity: 0 }     // Fade out and slide out to the left
   };
+  /**
+   * Renders the active component based on the activeTab state.
+   * If the activeTab is 'UpComing Maintenance', it renders the UpComingMaintenance component.
+   * If the activeTab is 'Maintenance History', it renders the MaintenanceHistory component.
+   * If the activeTab is neither of the above, it returns null.
+   * @returns {JSX.Element | null} The rendered active component or null.
+   */
   const renderActiveComponent = () => {
     if (activeTab === 'UpComing Maintenance') {
       return <UpComingMaintenance />;

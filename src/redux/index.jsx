@@ -7,9 +7,11 @@ import userIdReducer from "./userIdSlice";
 import emailReducer from './EmailSlice';
 import userReducer from './userSlice'; // Import the user slice
 
+import reportReducer from "./reportSlice";
+
 // Setting up the store with the slices
 const store = configureStore({
-  reducer: { auth: authReducer, email: emailReducer, user: userReducer,plants: plantReducer, userId: userIdReducer }, // Add user reducer
+  reducer: { auth: authReducer, email: emailReducer, user: userReducer,plants: plantReducer, userId: userIdReducer ,report: reportReducer, }, // Add user reducer
 });
 
 // Exporting the actions and the store

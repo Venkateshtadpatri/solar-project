@@ -19,6 +19,15 @@ const modalVariants = {
   },
 };
 
+
+/**
+ * A modal component to update a maintenance task.
+ *
+ * @param {boolean} showModal Whether the modal should be shown.
+ * @param {function} handleCloseModal Function to close the modal.
+ * @param {object} task The maintenance task to be updated.
+ * @param {number} PlantId The ID of the plant this task belongs to.
+ */
 const UpdateTaskModal = ({ showModal, handleCloseModal, task, PlantId }) => {
   const [taskId, setTaskId] = useState(task?.taskId || "");
   const [taskName, setTaskName] = useState(task?.taskName || "");
@@ -50,6 +59,12 @@ const UpdateTaskModal = ({ showModal, handleCloseModal, task, PlantId }) => {
     return `${year}-${month}-${day}`;
   }
 
+  /**
+   * Handles the form submission to mark a maintenance task as complete.
+   * @param {React.FormEvent<HTMLFormElement>} e - The form event.
+   *
+   * @returns {Promise<void>} A promise that resolves when the task is marked as complete.
+   */
   const handleTaskComplete = async (e) => {
     e.preventDefault();
     setError("");
@@ -76,6 +91,12 @@ const UpdateTaskModal = ({ showModal, handleCloseModal, task, PlantId }) => {
     }
   };
 
+  /**
+   * Handles the form submission to update a maintenance task.
+   * @param {React.FormEvent<HTMLFormElement>} e - The form event.
+   *
+   * @returns {Promise<void>} A promise that resolves when the task is updated.
+   */
   const handleSave = async (e) => {
     e.preventDefault();
     setError("");

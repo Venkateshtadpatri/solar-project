@@ -6,6 +6,17 @@ import  PhoneInput  from 'react-phone-input-2';
 import 'react-phone-input-2/lib/material.css';
 import axios from 'axios';
 
+/**
+ * A modal component to update admin details.
+ *
+ * @param {{ showModal: boolean, handleCloseModal: function, admin: object }} props
+ * @returns {JSX.Element}
+ *
+ * This component displays a modal form for updating admin details. It
+ * displays the admin's current details, and allows the user to edit the
+ * phone number and email fields. Upon submission, the component sends a
+ * PUT request to the server to update the admin's details.
+ */
 const AdminUpdateModal = ({ showModal, handleCloseModal, admin }) => {
   const [email, setEmail] = useState('');
   const [plantID, setPlantID] = useState(''); // State to hold Plant ID, but no edit option

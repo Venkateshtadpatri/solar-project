@@ -15,6 +15,14 @@ const columns = [
   { field: 'TaskDetails', header: 'Task Details' },
 ];
 
+/**
+ * A React component that displays a list of upcoming maintenance tasks for a specific plant.
+ * The component fetches data from the backend API at a 10-second interval and displays it in a table.
+ * The table has columns for the task ID, task name, schedule date, and status.
+ * The component also includes a search bar to filter the displayed tasks, and pagination controls to navigate through the list of tasks.
+ * If the user is not authenticated, the component redirects to the login page.
+ * @returns {JSX.Element} The JSX element representing the component.
+ */
 const UpComingMaintenance = () => {
   const isAuth = useSelector((state) => state.auth.isAuthenticated);
   const PlantId = useSelector((state) => state.auth.PlantId);
@@ -40,6 +48,13 @@ const UpComingMaintenance = () => {
     }
   }, [isAuth, navigate]); 
 
+  /**
+   * Fetches upcoming maintenance tasks for a given plant ID from the backend API and
+   * updates the component state. The data is fetched at a 10-second interval.
+   * The function only fetches data if the PlantId is set.
+   * The data is transformed into a table format before being set to the state.
+   * If the API request fails, an error message is logged to the console.
+   */
   const fetchMaintenances = async () => {
     try {
       const response = await axios.get(`http://127.0.0.1:8000/api/upcoming-maintenance/${PlantId}`);
@@ -57,6 +72,14 @@ const UpComingMaintenance = () => {
       console.error('Error fetching alerts:', error);
     }
   };
+
+/**
+ * Handles the change event for the search input field.
+ * Updates the search query state and filters the rows based on the query.
+ * Resets the pagination to the first page when the search query changes.
+ * 
+ * @param {Event} event - The input change event containing the search query.
+ */
 
   const handleSearchChange = (event) => {
     const query = event.target.value;
@@ -79,16 +102,34 @@ const UpComingMaintenance = () => {
   const currentRows = filteredRows.slice(indexOfFirstRow, indexOfLastRow);
   const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
 
+/**
+ * Handles the event when a task is clicked.
+ * Sets the selected task in the state and opens the update task modal.
+ * 
+ * @param {Object} task - The task that was clicked.
+ */
+
   const handleTaskClick = (task) => {
     setSelectedTask(task);
     setShowUpdateTaskModal(true);
   };
 
+  /**
+   * Closes the update task modal and resets the selected task to null.
+   * 
+   * @function
+   */
   const handleCloseUpdateTaskModal = () => {
     setShowUpdateTaskModal(false);
     setSelectedTask(null);
   
   };
+  /**
+   * Handles the "previous page" button click by decrementing the `currentPage`
+   * state variable and updating the `pageInput` state variable accordingly.
+   *
+   * @returns {undefined}
+   */
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -96,6 +137,12 @@ const UpComingMaintenance = () => {
     }
   };
 
+  /**
+   * Handles the "next page" button click by incrementing the `currentPage`
+   * state variable and updating the `pageInput` state variable accordingly.
+   *
+   * @returns {undefined}
+   */
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -103,6 +150,13 @@ const UpComingMaintenance = () => {
     }
   };
 
+  /**
+   * Handles the input change event for the page input field.
+   * If the input value is a valid number, it updates the `pageInput` state
+   * variable with the new value.
+   * @param {Event} event - The input change event.
+   * @returns {undefined}
+   */
   const handlePageInputChange = (event) => {
     const value = event.target.value;
     if (/^\d*$/.test(value)) {
@@ -110,6 +164,15 @@ const UpComingMaintenance = () => {
     }
   };
 
+  /**
+   * Handles the form submission event for the page input form.
+   * When the form is submitted, it prevents the default event from
+   * occurring and updates the `currentPage` state variable with the
+   * value of the `pageInput` state variable if it is a valid number
+   * within the range of the total number of pages.
+   * @param {Event} event - The form submission event.
+   * @returns {undefined}
+   */
   const handlePageInputSubmit = (event) => {
     event.preventDefault();
     const page = Number(pageInput);

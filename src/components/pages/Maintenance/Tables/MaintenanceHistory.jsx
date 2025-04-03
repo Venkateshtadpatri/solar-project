@@ -15,6 +15,11 @@ const columns = [
   { field: 'completedDate', header: 'Completed Date' },
 ];
 
+/**
+ * A React component that displays the maintenance history for a specific plant.
+ * @constructor
+ * @returns {JSX.Element} The JSX element representing the component.
+ */
 const MaintenanceHistory = () => {
   const isAuth = useSelector((state) => state.auth.isAuthenticated);
   const PlantId = useSelector((state) => state.auth.PlantId);
@@ -40,6 +45,13 @@ const MaintenanceHistory = () => {
     }
   }, [isAuth, navigate]); 
 
+  /**
+   * Fetches maintenance history data from the backend API and sets it to the component state.
+   * The data is fetched at a 10-second interval.
+   * The function only fetches data if the PlantId is set.
+   * The data is transformed into a table format before being set to the state.
+   * If the API request fails, an error message is logged to the console.
+   */
   const fetchMaintenances = async () => {
     try {
       const response = await axios.get(`http://127.0.0.1:8000/api/get_maintenace_history/${PlantId}`);
@@ -57,6 +69,16 @@ const MaintenanceHistory = () => {
       console.error('Error fetching alerts:', error);
     }
   };
+
+/**
+ * Handles changes in the search input field.
+ * Updates the search query state and filters the rows based on the query.
+ * Filters rows by checking if the query is included in any of the row's
+ * taskId, taskName, schedule_date, or status fields (case insensitive).
+ * Resets the current page and page input to the first page upon search query change.
+ *
+ * @param {Object} event - The input change event containing the search query.
+ */
 
   const handleSearchChange = (event) => {
     const query = event.target.value;
@@ -89,6 +111,12 @@ const MaintenanceHistory = () => {
     setSelectedTask(null);
   
   };
+/**
+ * Decrements the current page number by 1 if the current page is greater than 1.
+ * Updates both the `currentPage` and `pageInput` state variables to reflect
+ * the new page number.
+ */
+
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -96,6 +124,14 @@ const MaintenanceHistory = () => {
     }
   };
 
+/**
+ * Increments the current page number by 1 if the current page is less than
+ * the total number of pages.
+ * Updates both the `currentPage` and `pageInput` state variables to reflect
+ * the new page number.
+ *
+ * @returns {undefined}
+ */
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -103,12 +139,29 @@ const MaintenanceHistory = () => {
     }
   };
 
+/**
+ * Handles the input change event for the page input field.
+ * Validates the input to ensure it consists only of digits.
+ * If valid, updates the `pageInput` state with the new value.
+ * 
+ * @param {Object} event - The input change event containing the new value.
+ */
+
   const handlePageInputChange = (event) => {
     const value = event.target.value;
     if (/^\d*$/.test(value)) {
       setPageInput(value);
     }
   };
+
+/**
+ * Handles the form submission event for the page input form.
+ * Prevents the default form submission behavior and updates the
+ * current page if the input page number is valid.
+ *
+ * @param {Event} event - The form submission event.
+ * @returns {undefined}
+ */
 
   const handlePageInputSubmit = (event) => {
     event.preventDefault();

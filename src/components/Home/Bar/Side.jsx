@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, NavLink, Link } from 'react-router-dom';
 import { authActions } from "../../../redux/auth";

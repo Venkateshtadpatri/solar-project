@@ -5,6 +5,21 @@ import axios from "axios";
 import ViewSMBSection from "./ViewSMBSection";
 import MoonLoader from "react-spinners/MoonLoader";
 
+/**
+ * The main workspace component for the solar panel monitoring portal.
+ *
+ * This component generates a layout based on the selected SMB or plant.
+ * It fetches power output data for the selected plant or SMB at a 10-second interval.
+ * The component also handles zooming, resetting, and loading states.
+ *
+ * @param {number} SmbCount The number of SMBs in the plant.
+ * @param {number} StringCount The number of strings in the plant.
+ * @param {number} PanelCount The number of panels in the plant.
+ * @param {string} SelectedPlantId The ID of the selected plant.
+ * @param {string} SelectedSMBID The ID of the selected SMB, if any.
+ *
+ * @returns {React.ReactElement}
+ */
 const ViewWorkspace = ({ SmbCount, StringCount, PanelCount, SelectedPlantId, SelectedSMBID }) => {
     const viewworkspaceRef = useRef(null);
     const [scaleFactor, setScaleFactor] = useState(1);
@@ -26,6 +41,17 @@ const ViewWorkspace = ({ SmbCount, StringCount, PanelCount, SelectedPlantId, Sel
     // Fetch power data for the selected plant at a 10-second interval
     useEffect(() => {
         if (!SelectedPlantId) return;
+
+/**
+ * Fetches power data for the selected plant or SMB.
+ *
+ * If a SelectedSMBID is provided, it fetches details specific to that SMB.
+ * Otherwise, it fetches power output data for the entire plant.
+ * The data is retrieved from an API and stored in the `powerData` state.
+ *
+ * @async
+ * @throws Will log an error message in case of a failed API request or unsuccessful response status.
+ */
 
         const fetchData = async () => {
             setLoading(true);
@@ -67,38 +93,17 @@ const ViewWorkspace = ({ SmbCount, StringCount, PanelCount, SelectedPlantId, Sel
         }
 
         if (SelectedSMBID) {
-            // Generate layout only for the selected SMB
             return [
                 Array.from({ length: StringCount }, () => Array(PanelCount).fill(0)),
             ];
         }
 
-        // Generate layout for all SMBs if none is specifically selected
         return Array.from({ length: SmbCount }, () =>
             Array.from({ length: StringCount }, () => Array(PanelCount).fill(0))
         );
     };
 
     const layout = generateLayout();
-
-    useEffect(() => {
-        const workspaceElement = viewworkspaceRef.current;
-        if (workspaceElement) {
-            workspaceElement.addEventListener("wheel", handleZoom, { passive: false });
-        }
-
-        return () => {
-            if (workspaceElement) {
-                workspaceElement.removeEventListener("wheel", handleZoom);
-            }
-        };
-    }, []);
-
-    const handleZoom = (event) => {
-        event.preventDefault();
-        const zoomFactor = event.deltaY < 0 ? 1.1 : 0.9;
-        setScaleFactor((prev) => Math.max(0.5, Math.min(prev * zoomFactor, 5)));
-    };
 
     return (
         <div id="workspace" className="min-h-screen absolute flex custom-background text-white w-full p-5 -z-40 scrollbar-corner-sky-500 scrollbar scrollbar-thumb-slate-700 scrollbar-track-slate-300 overflow-x-auto">
@@ -107,6 +112,11 @@ const ViewWorkspace = ({ SmbCount, StringCount, PanelCount, SelectedPlantId, Sel
                 onZoomOut={handleZoomOut}
                 onReset={handleReset}
             />
+            {loading && (
+                <div className="fixed inset-0 w-full h-full bg-black bg-opacity-40 flex items-center justify-center z-50">
+                    <MoonLoader color="#FFF" size={50} />
+                </div>
+            )}
             <div
                 ref={viewworkspaceRef}
                 style={{
@@ -117,11 +127,6 @@ const ViewWorkspace = ({ SmbCount, StringCount, PanelCount, SelectedPlantId, Sel
                 }}
                 className="-ml-[400px] mb-5"
             >
-                {loading && (
-                    <div className="sticky inset-0 flex justify-center items-center z-50 bg-black bg-opacity-50">
-                        <MoonLoader color="#FFF" size={50} />
-                    </div>
-                )}
                 {layout.length === 0 ? (
                     <div className="text-center text-red-500">No data available for the selected plant or SMB.</div>
                 ) : (

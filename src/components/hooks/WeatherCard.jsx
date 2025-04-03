@@ -16,6 +16,11 @@ const formatDate = (date) => {
     return { day, suffix, month, dayOfWeek };
 };
 
+/**
+ * Formats a Date object into a 12-hour time string with AM/PM suffix.
+ * @param {Date} date The Date object to format.
+ * @returns {string} The formatted time string.
+ */
 const formatTime = (date) => {
     const hours = date.getHours();
     const minutes = date.getMinutes();
@@ -23,6 +28,23 @@ const formatTime = (date) => {
     return formattedTime;
 };
 
+/**
+ * A React component that displays the current weather data and a 5-day forecast for a given city.
+ * @returns {JSX.Element} The WeatherCard component.
+ * @example
+ * import { WeatherContext } from '../api/WeatherContext';
+ * import WeatherCard from '../components/hooks/WeatherCard';
+ *
+ * const Example = () => {
+ *     const { city, loading } = useContext(WeatherContext);
+ *
+ *     return (
+ *         <div>
+ *             <WeatherCard />
+ *         </div>
+ *     );
+ * }
+ */
 const WeatherCard = () => {
     const { weather, city, loading, hourlyForecast, dailyForecast } = useContext(WeatherContext);
 

@@ -15,6 +15,21 @@ const columns = [
   { field: 'Status', header: 'Status' },
 ];
 
+/**
+ * A React component that displays the alert history for a specific plant.
+ * The component fetches alert data from the backend API at a 10-second interval.
+ * It supports searching, pagination, and displays alert severity with color coding.
+ * 
+ * - Utilizes `useSelector` to access authentication state and selected plant ID.
+ * - Redirects to home if the user is not authenticated.
+ * - Fetches alert history and transforms it into a table format.
+ * - Supports search functionality to filter table data based on SMB ID, String ID, alert name, and severity level.
+ * - Implements pagination with controls for navigating pages and input for direct page access.
+ * - Displays status with icons and text based on completeness.
+ * 
+ * @returns {JSX.Element} The AlertHistory component.
+ */
+
 const AlertHistory = () => {
   const isAuth = useSelector((state) => state.auth.isAuthenticated);
   const PlantId = useSelector((state) => state.auth.PlantId);
@@ -39,6 +54,13 @@ const AlertHistory = () => {
     };
   }, [isAuth, navigate]);
 
+  /**
+   * Returns a tailwindcss class string that represents the background color, border color, and text color
+   * based on the severity level of the alert. The colors are chosen to be consistent with the theme
+   * of the application.
+   * @param {string} SeverityLevel - The severity level of the alert.
+   * @returns {string} A tailwindcss class string that can be used to style an HTML element.
+   */
   const getStatusColor = (SeverityLevel) => {
     switch (SeverityLevel) {
       case 'Warning':
@@ -52,6 +74,13 @@ const AlertHistory = () => {
     }
   };
 
+  /**
+   * Fetches alert history data from the backend API and updates the `filteredRows` state.
+   * The data is fetched at a 10-second interval.
+   * The function only fetches data if the PlantId is set.
+   * The data is transformed into a table format before being set to the state.
+   * If the API request fails, an error message is logged to the console.
+   */
   const fetchAlertHistory = async () => {
     try {
       const response = await axios.get(`http://127.0.0.1:8000/api/alert_history/${PlantId}`);
@@ -76,6 +105,14 @@ const AlertHistory = () => {
     }
   };
 
+/**
+ * Handles the input change event for the search field.
+ * Updates the search query state with the input value
+ * and resets the pagination to the first page.
+ * 
+ * @param {Event} event - The input change event.
+ */
+
   const handleSearchChange = (event) => {
     const query = event.target.value;
     setSearchQuery(query);
@@ -84,6 +121,13 @@ const AlertHistory = () => {
   };
 
   const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+
+/**
+ * Handles the "previous page" button click by decrementing the `currentPage`
+ * state variable and updating the `pageInput` state variable accordingly.
+ *
+ * @returns {undefined}
+ */
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
@@ -94,10 +138,26 @@ const AlertHistory = () => {
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
+/**
+ * Handles the "next page" button click by incrementing the `currentPage`
+ * state variable and updating the `pageInput` state variable accordingly.
+ *
+ * @returns {undefined}
+ */
       setCurrentPage(currentPage + 1);
       setPageInput(currentPage + 1);
     }
   };
+
+/**
+ * Handles the input change event for the page input field.
+ * Updates the `pageInput` state variable with the new value if it
+ * consists only of digits. This ensures that page input is always
+ * a valid number or empty.
+ * 
+ * @param {Event} event - The input change event.
+ * @returns {undefined}
+ */
 
   const handlePageInputChange = (event) => {
     const value = event.target.value;
@@ -106,6 +166,15 @@ const AlertHistory = () => {
     }
   };
 
+/**
+ * Handles the form submission event for the page input form.
+ * When the form is submitted, it prevents the default event from
+ * occurring and updates the `currentPage` state variable with the
+ * value of the `pageInput` state variable if it is a valid number
+ * within the range of the total number of pages.
+ * @param {Event} event - The form submission event.
+ * @returns {undefined}
+ */
   const handlePageInputSubmit = (event) => {
     event.preventDefault();
     const page = Number(pageInput);
